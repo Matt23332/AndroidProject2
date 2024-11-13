@@ -19,6 +19,11 @@ constraintlayout = "2.2.0"
 navigationCompose = "2.8.3"
 navigationComposeVersion = "2.7.0"
 ui = "1.7.5"
+roomCommon = "2.6.1"
+roomRuntimeAndroid = "2.7.0-alpha11"
+appcompat = "1.7.0"
+material = "1.12.0"
+activity = "1.9.3"
 
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
@@ -45,6 +50,11 @@ firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai",
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
