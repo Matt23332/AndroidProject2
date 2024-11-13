@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUpActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -33,6 +34,7 @@ class SignUpActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         firebaseAuth = FirebaseAuth.getInstance()
+        val firestore = FirebaseFirestore.getInstance()
 
         setContent {
             SignUpScreen (
@@ -102,12 +104,13 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                signUpUser(email.text, password.text, confirmPassword.text, onSignUpSuccess)
+                signUpUser(email.text, password.text, confirmPassword.text, userRole.text, onSignUpSuccess)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("SIGN UP")
         }
+
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(onClick = { onNavigateToLogin() }) {
             Text("Already have an account? Login here.")
@@ -115,34 +118,44 @@ fun SignUpScreen(
     }
 }
 
-fun signUpUser(email: String, password: String, confirmPassword: String, onSignupSuccess: () -> Unit) {
-    if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+fun signUpUser(email: String, password: String, confirmPassword: String, role: String, onSignupSuccess: () -> Unit) {
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+
+    if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && role.isNotEmpty()) {
         if (password == confirmPassword) {
-            FirebaseAuth.getInstance()
-                .createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        onSignupSuccess()
-                    } else {
-                        Toast.makeText(
-                            FirebaseAuth.getInstance().app.applicationContext,
-                            "Error: ${it.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val userId = firebaseAuth.currentUser?.uid
+                    val userData = hashMapOf(
+                        "email" to email,
+                        "role" to role
+                    )
+
+                    // Add user to the main 'users' collection
+                    userId?.let { id ->
+                        firestore.collection("users").document(id).set(userData).addOnSuccessListener {
+                            // Add user to either 'farmers' or 'customers' collection based on role
+                            val collectionName = if (role.equals("farmer", ignoreCase = true)) "farmers" else "customers"
+                            firestore.collection(collectionName).document(id).set(userData)
+                                .addOnSuccessListener {
+                                    onSignupSuccess()
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(firebaseAuth.app.applicationContext, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        }.addOnFailureListener { e ->
+                            Toast.makeText(firebaseAuth.app.applicationContext, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
+                } else {
+                    Toast.makeText(firebaseAuth.app.applicationContext, "Error: ${it.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
         } else {
-            Toast.makeText(
-                FirebaseAuth.getInstance().app.applicationContext,
-                "Passwords do not match",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(firebaseAuth.app.applicationContext, "Passwords do not match", Toast.LENGTH_SHORT).show()
         }
     } else {
-        Toast.makeText(
-            FirebaseAuth.getInstance().app.applicationContext,
-            "Fields cannot be left empty",
-            Toast.LENGTH_SHORT
-        ).show()
+        Toast.makeText(firebaseAuth.app.applicationContext, "Fields cannot be left empty", Toast.LENGTH_SHORT).show()
     }
 }

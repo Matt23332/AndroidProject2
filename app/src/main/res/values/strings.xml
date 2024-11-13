@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">AndroidProject2</string>
+    <string name="crop1">Beans</string>
+    <string name="crop2">Rice</string>
+    <string name="crop3">Bananas\n</string>
+    <string name="crop4">Oranges</string>
+    <string name="crop5">Grapes</string>
+    <string name="crop6">Maize</string>
+    <string name="crop7">Potatoes</string>
+    <string name="crop8">Cabbage</string>
+    <string name="crop9">Sukuma wiki</string>
+    <string name="crop10">Arrow roots</string>
+    <string name="crop11">Wheat</string>
 </resources>

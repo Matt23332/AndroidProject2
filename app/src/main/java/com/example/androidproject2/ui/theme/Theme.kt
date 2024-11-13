@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -55,4 +56,31 @@ fun AndroidProject2Theme(
         typography = Typography,
         content = content
     )
+}
+
+@Composable
+fun AppTheme(
+
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalAppColors provides extendedColors,
+        LocalAppTypography provides extendedTypography
+    ) {
+        MaterialTheme(
+
+
+            content = content
+        )
+    }
+
+
+}
+object AppTheme{
+    val colors: AppColors
+        @Composable
+        get() = LocalAppColors.current
+    val typography: AppTypography
+        @Composable
+        get()= LocalAppTypography.current
 }

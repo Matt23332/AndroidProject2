@@ -52,6 +52,11 @@ android {
 
 dependencies {
 
+   implementation(libs.firebase.firestore)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.ui)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation (libs.androidx.navigation.compose.v270)// Check for the latest version
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -61,6 +66,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
+    implementation(libs.androidx.media3.effect)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.compose)
+    //implementation(libs.firebase.vertexai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

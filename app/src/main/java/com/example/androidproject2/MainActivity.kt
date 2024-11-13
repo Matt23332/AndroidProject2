@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 
@@ -43,8 +44,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(onLogout: () -> Unit) {
     val currentUser = FirebaseAuth.getInstance().currentUser
+    val context = LocalContext.current
 
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
@@ -57,10 +59,19 @@ fun MainScreen(onLogout: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
         Button(
+            onClick = {
+                context.startActivity(Intent(context, CropEntryActivity::class.java))
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add Crop Info")
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
             onClick = { onLogout() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("lOGOUT" )
+            Text("LOGOUT")
         }
     }
 }
