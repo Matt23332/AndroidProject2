@@ -17,34 +17,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.androidproject2.data.ImageSource
 import com.example.androidproject2.model.Catalog
 import com.example.androidproject2.R
 
 
-/*@Composable
+@Composable
 fun CatalogScreen() {
     val products = ImageSource().loadStock()
 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(products) { product ->
-            Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
                 Image(
                     painter = painterResource(id = product.imageResourceId),
-                    contentDescription = product.stringResourceId,
+                    contentDescription = stringResource(id = product.stringResourceId), // Fix here
                     modifier = Modifier.size(64.dp)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(text = product.stringResourceId)
+                    Text(text = stringResource(id = product.stringResourceId)) // Fix here
                     Text(text = product.price)
                 }
             }
         }
     }
-}*/
+}
 
-@Composable
+/*@Composable
 fun CatalogScreen(modifier: Modifier = Modifier) {
     val layoutDirection = LocalLayoutDirection.current
     Surface(
@@ -63,7 +66,7 @@ fun CatalogScreen(modifier: Modifier = Modifier) {
     }
 
 
-}
+}*/
 
 @Composable
 fun CatalogCard(
@@ -102,10 +105,17 @@ fun CatalogCardPreview(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CatalogList(catalogList: List<Catalog>, modifier: Modifier= Modifier) {
+fun CatalogList(
+    catalogList: List<Catalog>,
+    navController: NavController,
+    modifier: Modifier= Modifier) {
     LazyColumn(modifier = modifier) {
-        items(catalogList){
-            catalog-> CatalogCard(catalog = catalog, modifier = Modifier.padding(8.dp))
+        items(catalogList) { crop ->
+            CatalogCard(catalog = crop, onClick = {
+                val selectedCrop
+                selectedCrop.value = crop
+                navController.navigate("product_details/${crop.id}")
+            })
             
         }
     }
