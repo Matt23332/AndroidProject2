@@ -80,6 +80,7 @@ fun getUserCrops(farmerId: String, onSuccess: (List<Crop>) -> Unit, onFailure: (
                     location = document.getString("location") ?: "",
                     farmerId = document.getString("farmerId") ?: "",
                     farmerName = document.getString("farmerName") ?: ""
+                    
                 )
             }
             onSuccess(crops)
