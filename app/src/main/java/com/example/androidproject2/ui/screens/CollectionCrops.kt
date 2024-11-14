@@ -4,6 +4,8 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Agriculture
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
@@ -15,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.androidproject2.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.androidproject2.data.Crop
@@ -74,13 +77,15 @@ fun getUserCrops(farmerId: String, onSuccess: (List<Crop>) -> Unit, onFailure: (
         .addOnSuccessListener { snapshot ->
             val crops = snapshot.documents.map { document ->
                 Crop(
+                    cropId = document.id, // Assuming Firestore document ID is used as cropId
                     name = document.getString("name") ?: "",
                     type = document.getString("type") ?: "",
                     quantity = document.getLong("quantity")?.toInt() ?: 0,
                     location = document.getString("location") ?: "",
                     farmerId = document.getString("farmerId") ?: "",
-                    farmerName = document.getString("farmerName") ?: ""
-                    
+                    farmerName = document.getString("farmerName") ?: "",
+                    cropImage = R.drawable.plant, // Provide a default image or fetch from Firestore if available
+                    cropDescription = document.getString("description") ?: "No description available."
                 )
             }
             onSuccess(crops)
