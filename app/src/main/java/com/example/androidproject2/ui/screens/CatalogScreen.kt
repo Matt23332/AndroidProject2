@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +73,7 @@ fun CatalogScreen(modifier: Modifier = Modifier) {
 @Composable
 fun CatalogCard(
     catalog: Catalog,
+    onClick: () -> Unit={},
     modifier: Modifier= Modifier
 ) {
     Card(modifier = modifier) {
@@ -108,17 +111,16 @@ fun CatalogCardPreview(modifier: Modifier = Modifier) {
 fun CatalogList(
     catalogList: List<Catalog>,
     navController: NavController,
-    modifier: Modifier= Modifier) {
+    modifier: Modifier = Modifier
+) {
+    val selectedCrop = remember { mutableStateOf<Catalog?>(null) } // Initialize selectedCrop as a state
+
     LazyColumn(modifier = modifier) {
         items(catalogList) { crop ->
             CatalogCard(catalog = crop, onClick = {
-                val selectedCrop
-                selectedCrop.value = crop
-                navController.navigate("product_details/${crop.id}")
+                selectedCrop.value = crop // Update the selected crop state
+                navController.navigate("product_details/${crop.stringResourceId}")
             })
-            
         }
     }
-
-
 }
