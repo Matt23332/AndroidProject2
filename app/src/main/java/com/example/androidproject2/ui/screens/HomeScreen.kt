@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 sealed class Screen(val route: String, val icon: ImageVector, val label: String) {
     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
@@ -62,7 +63,7 @@ fun HomeScreen() {
                 TrendsScreen()
             }
             composable(Screen.MyCrops.route) {
-                MyCropsScreen()
+                MyCropsScreen(navController = navController)
             }
             composable(Screen.Profile.route) {
                 ProfileScreen()
@@ -70,6 +71,8 @@ fun HomeScreen() {
         }
     }
 }
+
+
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {
@@ -124,15 +127,10 @@ fun TrendsScreen() {
 }
 
 @Composable
-fun MyCropsScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "My Crops Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
-    }
+fun MyCropsScreen(navController: NavController) {
+    CropListScreen(navController = navController)
 }
+
 
 @Composable
 fun ProfileScreen() {
