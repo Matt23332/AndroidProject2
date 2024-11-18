@@ -12,8 +12,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -77,6 +83,8 @@ fun ProductDetailsScreen(
 
     }
 }*/
+
+
 
 class ProductDetailsViewModel : ViewModel() {
     private val firestoreRepo = FirestoreRepo()
@@ -215,9 +223,44 @@ class ProductDetailsViewModel : ViewModel() {
         // Return details like name, image resource, etc. from a local source or hardcoded list.
     }
 
-    fun getFarmersForCrop(cropId: String): List<Farmer> {
-        // Fetch farmer details from Firestore based on the selected cropId.
-        return firestoreRepo.fetchFarmersForCrop(cropId)
+    fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val farmers = mutableListOf<Farmer>()
+
+        db.collection("farmers")
+            .whereEqualTo("cropId", cropId)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val farmer = document.toObject(Farmer::class.java)
+                    farmers.add(farmer)
+                }
+                onComplete(farmers) // Pass the fetched list of farmers to the callback
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error fetching farmers", exception)
+                onComplete(emptyList()) // If failed, return an empty list
+            }
+    }
+
+    fun placeOrder(cropId: String, farmerId: String) {
+        val db= FirebaseFirestore.getInstance()
+        val farmerRef = db.collection("farmers").document(farmerId)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(farmerRef)
+            val currentQuantity = snapshot.getLong("quantity") ?: 0
+
+            if (currentQuantity > 0) {
+                transaction.update(farmerRef, "quantity", currentQuantity - 1)
+            } else {
+                throw Exception("Farmer out of stock")
+            }
+        }.addOnSuccessListener {
+            Log.d("Order", "Order placed successfully")
+        }.addOnFailureListener { e ->
+            Log.e("Order", "Order failed: ${e.message}")
+        }
     }
 
 
@@ -255,6 +298,74 @@ class FirestoreRepo {
     }
 }
 
+@Composable
+fun ProductDetailsScreen(
+    navController: NavController,
+    cropId: String,
+    viewModel: ProductDetailsViewModel
+) {
+    // Fetch crop details
+    val cropDetails = viewModel.getCropDetails(cropId)
+
+    // State for storing the farmers
+    val farmersState = remember { mutableStateOf<List<Farmer>>(emptyList()) }
+
+    // Fetch farmer details asynchronously
+    LaunchedEffect(cropId) {
+        viewModel.getFarmersForCrop(cropId) { farmers ->
+            farmersState.value = farmers
+        }
+    }
+
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        // Crop Details
+        Image(
+            painter = painterResource(id = cropDetails.cropImage),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth().height(200.dp)
+        )
+        Text(text = cropDetails.name, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = cropDetails.cropDescription,
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Farmers Section
+        Text(text = "Farmers Selling This Crop:", style = MaterialTheme.typography.headlineSmall)
+        if (farmersState.value.isEmpty()) {
+            Text(text = "Loading farmers...", style = MaterialTheme.typography.bodySmall)
+        } else {
+            farmersState.value.forEach { farmer ->
+                FarmerCard(farmer = farmer, cropId = cropId, viewModel = viewModel)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun FarmerCard(
+    farmer: Farmer,
+    cropId: String,
+    viewModel: ProductDetailsViewModel
+) {
+    Card(modifier = Modifier.padding(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Farmer: ${farmer.name}")
+            Text(text = "Quantity: ${farmer.quantity} kg")
+
+            // Button to order crop
+            TextButton(onClick = {
+                viewModel.placeOrder(cropId, farmer.id)
+            }) {
+                Text(text = "Order from ${farmer.name}")
+            }
+        }
+    }
+}
 
 
 
@@ -264,6 +375,9 @@ class FirestoreRepo {
 
 
 
+
+
+/*
 @Composable
 fun ProductDetailsScreen(
     navController: NavController,
@@ -284,8 +398,10 @@ fun ProductDetailsScreen(
         }
 
 
+
+
     }
-}
+}*/
 
 
 /*
