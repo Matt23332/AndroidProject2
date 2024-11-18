@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.example.androidproject2.data.Crop
 //import com.example.androidproject2.models.Crop
 
-@Composable
+/*@Composable
 fun CropEntryScreen(onSave: (Crop) -> Unit) {
     var cropType by remember { mutableStateOf("") }
     var quantityText by remember { mutableStateOf("") }
@@ -41,7 +41,7 @@ fun CropEntryScreen(onSave: (Crop) -> Unit) {
         Button(
             onClick = {
                 val quantity = quantityText.toIntOrNull() ?: 0
-                val crop = Crop(cropType, quantity)
+                val crop = Crop(cropType, name, quantity,)
                 onSave(crop)
             },
             modifier = Modifier.fillMaxWidth()
@@ -49,4 +49,4 @@ fun CropEntryScreen(onSave: (Crop) -> Unit) {
             Text("Save Crop")
         }
     }
-}
+}*/
