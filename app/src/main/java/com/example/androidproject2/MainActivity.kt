@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.androidproject2.ui.screens.HomeScreen
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -29,18 +30,22 @@ class MainActivity : ComponentActivity() {
 
         firebaseAuth = FirebaseAuth.getInstance()
 
-        setContent {
-            MainScreen(
-                onLogout = {
-                    firebaseAuth.signOut()
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
-                }
-            )
+        // Check if the user is already logged in
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser == null) {
+            // If not logged in, navigate to LoginActivity
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        } else {
+            // If logged in, show the HomeScreen
+            setContent {
+                HomeScreen()
+            }
         }
     }
 }
 
+/*
 @Composable
 fun MainScreen(onLogout: () -> Unit) {
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -75,3 +80,5 @@ fun MainScreen(onLogout: () -> Unit) {
         }
     }
 }
+
+ */
