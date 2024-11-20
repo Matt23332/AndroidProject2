@@ -33,7 +33,7 @@ sealed class Screen(val route: String, val icon: ImageVector, val label: String)
 fun HomeScreen() {
     val navController = rememberNavController()
     val currentUser = FirebaseAuth.getInstance().currentUser
-    val userName = currentUser?.displayName ?: "User"
+    val userName = currentUser?.displayName ?: currentUser
 
     Scaffold(
         topBar = {
@@ -54,7 +54,7 @@ fun HomeScreen() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Catalog.route) {
-                CatalogScreen()
+                CatalogScreen(navController)
             }
             composable(Screen.History.route) {
                 HistoryScreen()
