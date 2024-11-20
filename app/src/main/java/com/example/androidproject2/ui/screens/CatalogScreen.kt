@@ -204,6 +204,7 @@ fun AppNavigation(navController: NavHostController) {
             val viewModel = ProductDetailsViewModel()
             ProductDetailsScreen(navController, cropId, viewModel)
         }
+        composable("crop_input"){ CropInputScreen(navController)}
     }
 }
 
