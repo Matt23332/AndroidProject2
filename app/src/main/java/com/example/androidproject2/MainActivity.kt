@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject2.ui.screens.HomeScreen
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.local.Persistence
 
 class MainActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -34,6 +35,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         firebaseAuth = FirebaseAuth.getInstance()
+        //firebaseAuth.setPersistence(Persistence.PERSISTENT) // Ensures the session is maintained across app restarts.
+
 
         // Check if the user is already logged in
         val currentUser = firebaseAuth.currentUser
@@ -44,12 +47,13 @@ class MainActivity : ComponentActivity() {
         } else {
             // If logged in, show the HomeScreen
             setContent {
-                HomeScreen() // Correctly passing the navController to AppNavigation
+                val navController = rememberNavController()
+                HomeScreen()
             }
-
         }
     }
 }
+
 
 /*
 @Composable
