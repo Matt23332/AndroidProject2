@@ -27,6 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 import com.example.androidproject2.R
 import com.example.androidproject2.data.Crop
@@ -297,7 +302,7 @@ class FirestoreRepo {
         return farmers // This may need to be adjusted for asynchronous behavior
     }
 }
-
+/*
 @Composable
 fun ProductDetailsScreen(
     navController: NavController,
@@ -343,7 +348,8 @@ fun ProductDetailsScreen(
             }
         }
     }
-}
+}*/
+
 
 
 @Composable
@@ -366,6 +372,8 @@ fun FarmerCard(
         }
     }
 }
+
+
 
 
 
@@ -440,6 +448,46 @@ fun ProductDetailsScreen(
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
 }*/
+@Composable
+fun ProductDetailsScreen(
+    navController: NavController,
+    cropId: String,
+    viewModel: ProductDetailsViewModel
+) {
+    val cropDetails = viewModel.getCropDetails(cropId)
+    val farmersState = remember { mutableStateOf<List<Farmer>>(emptyList()) }
+
+    LaunchedEffect(cropId) {
+        viewModel.getFarmersForCrop(cropId) { farmers ->
+            farmersState.value = farmers
+        }
+    }
+
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Image(
+            painter = painterResource(id = cropDetails.cropImage),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth().height(200.dp)
+        )
+        Text(text = cropDetails.name, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = cropDetails.cropDescription,
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Farmers Selling This Crop:", style = MaterialTheme.typography.headlineSmall)
+
+        if (farmersState.value.isEmpty()) {
+            Text(text = "Loading farmers...", style = MaterialTheme.typography.bodySmall)
+        } else {
+            farmersState.value.forEach { farmer ->
+                FarmerCard(farmer = farmer, cropId = cropId, viewModel = viewModel)
+            }
+        }
+    }
+}
+
 
 
 @Composable
@@ -486,4 +534,24 @@ private fun Content(
 
     }
 
+}
+
+@Composable
+fun AppNavGraph(navController: NavHostController) {
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            HomeScreen()
+        }
+        composable(
+            "productDetails/{cropId}",
+            arguments = listOf(navArgument("cropId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+            val viewModel = ProductDetailsViewModel() // Or use hiltViewModel() if using DI
+            ProductDetailsScreen(navController, cropId, viewModel)
+        }
+    }
 }
