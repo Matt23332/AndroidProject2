@@ -15,7 +15,9 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -34,6 +36,7 @@ fun HomeScreen() {
     val navController = rememberNavController()
     val currentUser = FirebaseAuth.getInstance().currentUser
     val userName = currentUser?.displayName ?: currentUser
+    val userEmail = currentUser?.email ?: currentUser
 
     Scaffold(
         topBar = {
@@ -54,19 +57,42 @@ fun HomeScreen() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Catalog.route) {
-                CatalogScreen(navController)
+                CatalogScreen(
+                    userName = userName.toString(),
+                    recommendItems = listOf("Corn", "Wheat", "Potatoes")
+                )
             }
             composable(Screen.History.route) {
-                HistoryScreen()
+                HistoryScreen(
+                    userHistory = listOf(
+                        "Planted corn on 2024-11-10",
+                        "Harvested maize on 2024-11-20"
+                    )
+                )
             }
             composable(Screen.Trends.route) {
-                TrendsScreen()
+                TrendsScreen(
+                    trendData = mapOf(
+                        "Corn prices" to "Up 5%",
+                        "Maize harvest" to "Steady",
+                        "Potatoes demand" to "high"
+                    )
+                )
             }
             composable(Screen.MyCrops.route) {
-                MyCropsScreen(navController = navController)
+                MyCropsScreen(
+                    navController = navController,
+                    crops = listOf(
+                        Crop(name = "Corn", status = "Planted", progress = 50),
+                        Crop(name = "Maize", status = "Planting", progress = 30)
+                    )
+                )
             }
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    userName = userName.toString(),
+                    userEmail = userEmail.toString()
+                )
             }
         }
     }
@@ -105,40 +131,83 @@ fun BottomNavBar(navController: NavHostController) {
 }
 
 @Composable
-fun HistoryScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "History Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
+fun CatalogScreen(userName: String, recommendItems: List<String>) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text(text = "Hello, $userName! Here are some recommendations:", style = MaterialTheme.typography.bodyLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        recommendItems.forEach { item ->
+            Text(text =  item, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
 @Composable
-fun TrendsScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun HistoryScreen(userHistory: List<String>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text(
-            text = "Trends Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
+            text = "Your activity history:",
+            style = MaterialTheme.typography.headlineSmall
         )
+        userHistory.forEach { action ->
+            Text(
+                text = action,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
 @Composable
-fun MyCropsScreen(navController: NavController) {
-    CropListScreen(navController = navController)
+fun TrendsScreen(trendData: Map<String, String>) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text(text = "Market trends", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        trendData.forEach{ (key, value) ->
+            Text(text = "$key: $value", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
 
+data class Crop(val name: String, val status: String, val progress: Int)
 
 @Composable
-fun ProfileScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Profile Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
+fun MyCropsScreen(navController: NavController, crops: List<Crop>) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text(text = "My crops:", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        crops.forEach { crop ->
+            Text(
+                text = "${crop.name}: ${crop.status} (${crop.progress}%)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileScreen(userName: String, userEmail: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = userName,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = userEmail,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
