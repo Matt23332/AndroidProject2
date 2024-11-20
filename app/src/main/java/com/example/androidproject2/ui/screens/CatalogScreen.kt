@@ -1,6 +1,7 @@
 package com.example.androidproject2.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,12 +20,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.androidproject2.data.ImageSource
 import com.example.androidproject2.model.Catalog
 import com.example.androidproject2.R
 
-
+/*
 @Composable
 fun CatalogScreen() {
     val products = ImageSource().loadStock()
@@ -97,15 +105,73 @@ fun CatalogCard(
     }
 
 
+}*/
+@Composable
+fun CatalogScreen(navController: NavController) {
+    val products = ImageSource().loadStock()
+
+    LazyColumn(modifier = Modifier.padding(16.dp)) {
+        items(products) { product ->
+            CatalogCard(
+                catalog = product,
+                navController = navController
+            )
+        }
+    }
 }
 
+@Composable
+fun CatalogCard(
+    catalog: Catalog,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier
+        .padding(vertical = 16.dp)
+        .fillMaxWidth()
+        .clickable {
+            // Map the string resource ID to a cropId
+            val cropId = when(catalog.imageResourceId) {
+                R.drawable.beans -> "beans"
+                R.drawable.rice -> "rice"
+                R.drawable.bananas -> "bananas"
+                R.drawable.oranges -> "oranges"
+                R.drawable.grapes -> "grapes"
+                R.drawable.maize -> "maize"
+                R.drawable.potatoes -> "potatoes"
+                R.drawable.cabbage -> "cabbage"
+                R.drawable.sukuma_wiki -> "sukuma wiki"
+                R.drawable.arrow_roots -> "arrow roots"
+                R.drawable.wheat -> "wheat"
+                else -> "unknown"
+            }
+            navController.navigate("product_details/$cropId")
+        }
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Image(
+                painter = painterResource(id = catalog.imageResourceId),
+                contentDescription = stringResource(id = catalog.stringResourceId),
+                modifier = Modifier.size(64.dp),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(text = stringResource(id = catalog.stringResourceId))
+                Text(text = catalog.price)
+            }
+        }
+    }
+}
+
+/*
 @Preview
 @Composable
 fun CatalogCardPreview(modifier: Modifier = Modifier) {
     CatalogCard(
         catalog = Catalog(R.string.crop1, R.drawable.beans,"250 Per kg", 250, "link" ))
 
-}
+}*/
 
 @Composable
 fun CatalogList(
@@ -117,10 +183,24 @@ fun CatalogList(
 
     LazyColumn(modifier = modifier) {
         items(catalogList) { crop ->
-            CatalogCard(catalog = crop, onClick = {
-                selectedCrop.value = crop // Update the selected crop state
-                navController.navigate("product_details/${crop.stringResourceId}")
-            })
+            CatalogCard(catalog = crop, navController)
+        }
+    }
+}
+
+
+
+@Composable
+fun AppNavigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") { HomeScreen() }
+        composable(
+            "product_details/{cropId}",
+            arguments = listOf(navArgument("cropId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+            val viewModel = ProductDetailsViewModel()
+            ProductDetailsScreen(navController, cropId, viewModel)
         }
     }
 }

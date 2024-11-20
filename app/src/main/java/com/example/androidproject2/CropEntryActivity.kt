@@ -14,18 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 //import androidx.media3.effect.Crop
 import com.example.androidproject2.data.Crop
+import com.example.androidproject2.ui.screens.CropInputScreen
 import com.google.firebase.firestore.FirebaseFirestore
 
-class CropEntryActivity : ComponentActivity() {
+/*class CropEntryActivity : ComponentActivity() {
     private val firestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CropEntryScreen(onSave = { crop ->
-                saveCropToFirestore(crop)
-            })
+            CropInputScreen(navController = )
         }
     }
 
@@ -39,4 +38,4 @@ class CropEntryActivity : ComponentActivity() {
                 Toast.makeText(this, "Failed to save crop information: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
-}
+}*/
