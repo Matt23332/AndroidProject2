@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.androidproject2.ui.screens.AppNavigation
 import com.example.androidproject2.ui.screens.HomeScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.local.Persistence
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
             // If logged in, show the HomeScreen
             setContent {
                 val navController = rememberNavController()
-                HomeScreen()
+                AppNavigation(navController)
             }
         }
     }

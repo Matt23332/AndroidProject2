@@ -123,7 +123,6 @@ fun CatalogScreen(navController: NavController) {
 @Composable
 fun CatalogCard(
     catalog: Catalog,
-    //onClick: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
@@ -131,10 +130,24 @@ fun CatalogCard(
         .padding(vertical = 16.dp)
         .fillMaxWidth()
         .clickable {
-        // Navigate to product details with the crop name as a parameter
-        navController.navigate("product_details/${catalog.stringResourceId}")
-    })
-    {
+            // Map the string resource ID to a cropId
+            val cropId = when(catalog.imageResourceId) {
+                R.drawable.beans -> "beans"
+                R.drawable.rice -> "rice"
+                R.drawable.bananas -> "bananas"
+                R.drawable.oranges -> "oranges"
+                R.drawable.grapes -> "grapes"
+                R.drawable.maize -> "maize"
+                R.drawable.potatoes -> "potatoes"
+                R.drawable.cabbage -> "cabbage"
+                R.drawable.sukuma_wiki -> "sukuma wiki"
+                R.drawable.arrow_roots -> "arrow roots"
+                R.drawable.wheat -> "wheat"
+                else -> "unknown"
+            }
+            navController.navigate("product_details/$cropId")
+        }
+    ) {
         Row(modifier = Modifier.padding(16.dp)) {
             Image(
                 painter = painterResource(id = catalog.imageResourceId),
@@ -180,9 +193,11 @@ fun CatalogList(
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen() }  // Home screen as entry point
-        composable("catalog") { CatalogScreen(navController) }
-        composable("product_details/{cropId}") { backStackEntry ->
+        composable("home") { HomeScreen() }
+        composable(
+            "product_details/{cropId}",
+            arguments = listOf(navArgument("cropId") { type = NavType.StringType })
+        ) { backStackEntry ->
             val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
             val viewModel = ProductDetailsViewModel()
             ProductDetailsScreen(navController, cropId, viewModel)
