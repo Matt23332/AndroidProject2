@@ -32,8 +32,13 @@ sealed class Screen(val route: String, val icon: ImageVector, val label: String)
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val bottomNavController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    val userName = currentUser?.displayName ?: "User"
+    val farmerId= currentUser?.uid
+
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Welcome to the App") }) },
+        topBar = { TopAppBar(title = { Text("Welcome, $userName") }) },
         bottomBar = { BottomNavBar(navController = bottomNavController) }
     ) { innerPadding ->
         NavHost(
@@ -42,7 +47,7 @@ fun HomeScreen(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Catalog.route) { CatalogScreen(navController) }
-            composable(Screen.History.route) { HistoryScreen() }
+            composable(Screen.History.route) { HistoryScreen(navController) }
             composable(Screen.Trends.route) { TrendsScreen() }
             composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen() }
@@ -80,16 +85,7 @@ fun BottomNavBar(navController: NavHostController) {
     }
 }
 
-@Composable
-fun HistoryScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "History Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
-    }
-}
+
 
 @Composable
 fun TrendsScreen() {

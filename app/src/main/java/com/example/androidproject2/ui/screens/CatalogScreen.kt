@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -205,6 +207,20 @@ fun AppNavigation(navController: NavHostController) {
             ProductDetailsScreen(navController, cropId, viewModel)
         }
         composable("crop_input"){ CropInputScreen(navController)}
+        composable(
+            route = "order_screen/{farmerId}/{cropId}",
+            arguments = listOf(
+                navArgument("farmerId") { type = NavType.StringType },
+                navArgument("cropId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val farmerId = backStackEntry.arguments?.getString("farmerId") ?: ""
+            val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+            val viewModel = ProductDetailsViewModel()
+            OrderScreen(navController, farmerId, cropId, viewModel)
+        }
+
+
     }
 }
 
