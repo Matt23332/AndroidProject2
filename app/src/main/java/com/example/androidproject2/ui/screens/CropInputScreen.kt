@@ -23,17 +23,16 @@ fun CropInputScreen(navController: NavController) {
     val farmerId = currentUser?.uid ?: ""
     val farmerName = currentUser?.displayName ?: "Unknown"
 
+    // Fields for crop details
     var cropName by remember { mutableStateOf("") }
     var cropType by remember { mutableStateOf("") }
     var cropQuantity by remember { mutableStateOf("") }
     var cropLocation by remember { mutableStateOf("") }
     var cropDescription by remember { mutableStateOf("") }
-    var cropImage by remember { mutableStateOf("") } // Placeholder for image URL or resource
     var isLoading by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    // Show Toast when toastMessage changes
     LaunchedEffect(toastMessage) {
         if (toastMessage.isNotEmpty()) {
             Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
@@ -81,13 +80,6 @@ fun CropInputScreen(navController: NavController) {
             label = { Text("Description") },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = cropImage,
-            onValueChange = { cropImage = it },
-            label = { Text("Image URL / Resource ID") },
-            modifier = Modifier.fillMaxWidth()
-        )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
@@ -96,8 +88,7 @@ fun CropInputScreen(navController: NavController) {
                         cropType,
                         cropQuantity,
                         cropLocation,
-                        cropDescription,
-                        cropImage
+                        cropDescription
                     )
                 ) {
                     isLoading = true
@@ -108,12 +99,11 @@ fun CropInputScreen(navController: NavController) {
                         cropQuantity,
                         cropLocation,
                         cropDescription,
-                        cropImage.toIntOrNull() ?: 0,
                         farmerId,
                         farmerName,
                         onSuccess = {
                             isLoading = false
-                            navController.navigate("success") // Navigate to success page
+                            navController.navigate("home") // Navigate back to home screen
                         },
                         onFailure = { errorMessage ->
                             isLoading = false
@@ -139,7 +129,6 @@ fun saveCropData(
     quantity: String,
     location: String,
     description: String,
-    image: Int,
     farmerId: String,
     farmerName: String,
     onSuccess: () -> Unit,
@@ -152,7 +141,6 @@ fun saveCropData(
         "quantity" to parsedQuantity,
         "location" to location,
         "description" to description,
-        "image" to image,
         "farmerId" to farmerId,
         "farmerName" to farmerName
     )
@@ -165,18 +153,19 @@ fun saveCropData(
         }
 }
 
+
 fun validateInputs(
     name: String,
     type: String,
     quantity: String,
     location: String,
     description: String,
-    image: String
+    //image: String
 ): Boolean {
     return name.isNotBlank() &&
             type.isNotBlank() &&
             quantity.toIntOrNull() != null &&
             location.isNotBlank() &&
-            description.isNotBlank() &&
-            image.isNotBlank()
+            description.isNotBlank()
+           // image.isNotBlank()
 }
