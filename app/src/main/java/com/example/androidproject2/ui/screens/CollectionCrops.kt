@@ -60,12 +60,17 @@ fun CropListScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { navController.navigate("cropInputScreen") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Add Crop")
+        if (farmerId.isNotEmpty()) {
+            Button(
+                onClick = { navController.navigate("cropInputScreen") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Add Crop")
+            }
+        } else {
+            Text(text = "Please log in to add crops.")
         }
+
     }
 }
 

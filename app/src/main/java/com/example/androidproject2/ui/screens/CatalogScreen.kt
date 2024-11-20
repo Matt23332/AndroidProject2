@@ -131,7 +131,7 @@ fun CatalogCard(
         .fillMaxWidth()
         .clickable {
             // Map the string resource ID to a cropId
-            val cropId = when(catalog.imageResourceId) {
+            val cropId = when (catalog.imageResourceId) {
                 R.drawable.beans -> "beans"
                 R.drawable.rice -> "rice"
                 R.drawable.bananas -> "bananas"
@@ -146,6 +146,7 @@ fun CatalogCard(
                 else -> "unknown"
             }
             navController.navigate("product_details/$cropId")
+            navController.navigate("product_details/${cropId.ifEmpty { "unknown" }}")
         }
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
@@ -160,6 +161,7 @@ fun CatalogCard(
                 Text(text = stringResource(id = catalog.stringResourceId))
                 Text(text = catalog.price)
             }
+
         }
     }
 }
@@ -193,7 +195,7 @@ fun CatalogList(
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen() }
+        composable("home") { HomeScreen(navController) }
         composable(
             "product_details/{cropId}",
             arguments = listOf(navArgument("cropId") { type = NavType.StringType })
@@ -204,3 +206,4 @@ fun AppNavigation(navController: NavHostController) {
         }
     }
 }
+

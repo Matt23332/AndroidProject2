@@ -227,6 +227,21 @@ class ProductDetailsViewModel : ViewModel() {
 
         // Return details like name, image resource, etc. from a local source or hardcoded list.
     }
+    /*fun getCropDetails(cropId: String, onComplete: (Crop?) -> Unit, onError: (String) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("crops")
+            .document(cropId)
+            .get()
+            .addOnSuccessListener { document ->
+                val crop = document.toObject(Crop::class.java)
+                onComplete(crop)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProductDetailsViewModel", "Error fetching crop: ${e.message}")
+                onError("Error fetching crop details")
+            }
+    }*/
+
 
     fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
@@ -454,7 +469,26 @@ fun ProductDetailsScreen(
     cropId: String,
     viewModel: ProductDetailsViewModel
 ) {
-    val cropDetails = viewModel.getCropDetails(cropId)
+    if (cropId.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Invalid Crop ID", color = MaterialTheme.colorScheme.error)
+        }
+        return
+    }
+
+    // Fetch crop details as usual
+    val cropDetails = viewModel.getCropDetails(cropId) ?: Crop(
+        cropId = "unknown",
+        name = "Unknown Crop",
+        type = "",
+        quantity = 0,
+        location = "",
+        farmerId = "",
+        farmerName = "",
+        cropImage = R.drawable.beans,
+        cropDescription = "No description available"
+    )
+
     val farmersState = remember { mutableStateOf<List<Farmer>>(emptyList()) }
 
     LaunchedEffect(cropId) {
@@ -536,7 +570,7 @@ private fun Content(
 
 }
 
-@Composable
+/*@Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
@@ -554,4 +588,4 @@ fun AppNavGraph(navController: NavHostController) {
             ProductDetailsScreen(navController, cropId, viewModel)
         }
     }
-}
+}*/

@@ -30,49 +30,25 @@ sealed class Screen(val route: String, val icon: ImageVector, val label: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
-    val navController = rememberNavController()
-    val currentUser = FirebaseAuth.getInstance().currentUser
-    val userName = currentUser?.displayName ?: currentUser
-
+fun HomeScreen(navController: NavHostController) {
+    val bottomNavController = rememberNavController()
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Welcome, $userName",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-            )
-        },
-        bottomBar = { BottomNavBar(navController = navController) }
-    ) { paddingValues ->
+        topBar = { TopAppBar(title = { Text("Welcome to the App") }) },
+        bottomBar = { BottomNavBar(navController = bottomNavController) }
+    ) { innerPadding ->
         NavHost(
-            navController = navController,
+            navController = bottomNavController,
             startDestination = Screen.Catalog.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Catalog.route) {
-                CatalogScreen(navController)
-            }
-            composable(Screen.History.route) {
-                HistoryScreen()
-            }
-            composable(Screen.Trends.route) {
-                TrendsScreen()
-            }
-            composable(Screen.MyCrops.route) {
-                MyCropsScreen(navController = navController)
-            }
-            composable(Screen.Profile.route) {
-                ProfileScreen()
-            }
+            composable(Screen.Catalog.route) { CatalogScreen(navController) }
+            composable(Screen.History.route) { HistoryScreen() }
+            composable(Screen.Trends.route) { TrendsScreen() }
+            composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
+            composable(Screen.Profile.route) { ProfileScreen() }
         }
     }
 }
-
-
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {
@@ -95,7 +71,7 @@ fun BottomNavBar(navController: NavHostController) {
                 selected = currentRoute == screen.route,
                 onClick = {
                     navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId)
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         launchSingleTop = true
                     }
                 }
