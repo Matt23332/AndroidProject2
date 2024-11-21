@@ -15,10 +15,12 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestore
 
 sealed class Screen(val route: String, val icon: ImageVector, val label: String) {
     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
@@ -50,7 +52,33 @@ fun HomeScreen(navController: NavHostController) {
             composable(Screen.History.route) { HistoryScreen(navController) }
             composable(Screen.Trends.route) { TrendsScreen() }
             composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
-            composable(Screen.Profile.route) { ProfileScreen() }
+            composable(Screen.Profile.route) {
+                val userId = currentUser?.uid
+                val userEmail = currentUser?.email ?: "Email"
+                var userRole by remember { mutableStateOf("Loading...") }
+
+                val UserId = currentUser?.uid
+                LaunchedEffect(UserId) {
+                    if (userId != null) {
+                        val firestore = FirebaseFirestore.getInstance()
+                        firestore.collection("users").document(userId).get()
+                            .addOnSuccessListener { document ->
+                                userRole = document.getString("role") ?: "Unknown Role"
+                            }
+                            .addOnFailureListener {
+                                userRole = "Error fetching the role"
+                            }
+                    } else {
+                        userRole = "User not logged in"
+                    }
+                }
+                ProfileScreen(
+                    userName = userName,
+                    userEmail = userEmail,
+                    userRole = userRole
+                )
+            }
+            composable(Screen.Profile.route) {EditProfileScreen(navController) }
         }
     }
 }
@@ -103,14 +131,70 @@ fun MyCropsScreen(navController: NavController) {
     CropListScreen(navController = navController)
 }
 
-
 @Composable
-fun ProfileScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Profile Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
+fun ProfileScreen(
+    userName: String,
+    userEmail: String,
+    userRole: String,
+    modifier: Modifier = Modifier
+) {
+    val firestore = FirebaseFirestore.getInstance()
+    val profilePicUrl = remember { mutableStateOf<String?>(null) }
+    val loading = remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            firestore.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    profilePicUrl.value = document.getString("profilePicture")
+                    loading.value = false
+                }
+                .addOnFailureListener {
+                    loading.value = false
+                }
+        } else {
+            loading.value = false
+        }
+    }
+    Surface(modifier = modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+        if (loading.value) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(100.dp),
+                    strokeWidth = 8.dp
+                    )
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Name: $userName",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    text = "Email: $userEmail",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Role: $userRole",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Edit profile")
+                }
+            }
+        }
     }
 }
