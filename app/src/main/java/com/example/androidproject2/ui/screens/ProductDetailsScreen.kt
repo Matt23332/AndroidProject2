@@ -78,7 +78,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.rice, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Rice is a good source of carbohydrates. Rice is easy to prepare and makes a nice light meal",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -89,7 +89,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.bananas, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Bananas are a good source of energy. They can ",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -448,11 +448,11 @@ fun OrderScreen(
 
     // Fetch Farmer Details
     // Fetch Farmer Details
-    LaunchedEffect(farmerId) {
-        db.collection("crops").document(farmerId).get()
+    LaunchedEffect(cropId) {
+        db.collection("crops").document(cropId).get()
             .addOnSuccessListener { document ->
                 farmer = Farmer(
-                    id = document.id,
+                    id = document.getString("farmerId") ?: "Unknown", // Correctly fetch farmerId
                     FarmerName = document.getString("farmerName") ?: "Unknown",
                     name = document.getString("name") ?: "",
                     quantity = document.getLong("quantity")?.toInt() ?: 0,
@@ -463,6 +463,7 @@ fun OrderScreen(
                 Log.e("OrderScreen", "Error fetching farmer details: ${exception.message}")
             }
     }
+
 
     // Fetch Customer Details
     LaunchedEffect(Unit) {
