@@ -89,7 +89,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.bananas, // Replace with your actual drawable resource ID
-                cropDescription = "Bananas are a good source of energy. They can ",
+                cropDescription = "Bananas are a good source of energy. They can be used t",
                 farmerId = "",
                 farmerName = "",
                 location = ""
