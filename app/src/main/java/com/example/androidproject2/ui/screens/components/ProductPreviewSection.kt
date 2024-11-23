@@ -34,7 +34,6 @@ import com.example.androidproject2.data.ProductHighlights
 import com.example.androidproject2.data.ProductPreviewState
 import com.example.androidproject2.ui.theme.AppTheme
 
-
 @Composable
 fun ProductPreviewSection (
     modifier: Modifier = Modifier,
@@ -70,7 +69,6 @@ private fun  ProductBackground(
                 )
             )
     )
-
 }
 
 @Composable
@@ -108,7 +106,6 @@ private fun Content(
                 start.linkTo(anchor=parent.start, margin=19.dp)
                 top.linkTo(productImg.top)
             })
-
     }
 }
 
@@ -148,6 +145,5 @@ private fun CloseButton(
         ){
             Icon(painter = painterResource(id = R.drawable.wheat), contentDescription = null, modifier= Modifier.size(24.dp) )
         }
-
     }
 }

@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         //firebaseAuth.setPersistence(Persistence.PERSISTENT) // Ensures the session is maintained across app restarts.
 
-
         // Check if the user is already logged in
         val currentUser = firebaseAuth.currentUser
         if (currentUser == null) {

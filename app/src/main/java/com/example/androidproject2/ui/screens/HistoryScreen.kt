@@ -55,6 +55,9 @@ fun HistoryScreen(
             .addOnSuccessListener { result ->
                 val sales = result.documents.mapNotNull { it.data }
                 Log.d("HistoryScreen", "Fetched ${sales.size} sales.")
+                result.documents.forEach { document ->
+                    Log.d("HistoryScreen", "Sale: ${document.data}")
+                }
                 salesState.value = sales
                 isLoading.value = false
             }

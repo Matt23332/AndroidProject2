@@ -148,10 +148,8 @@ private fun SelectorButton(
                 contentDescription = null,
                 modifier= Modifier.size(7.dp)
             )
-
         }
     }
-
 }
 
 @Composable
@@ -166,7 +164,6 @@ private fun Cart(
         contentColor = AppTheme.colors.onSecondarySurface,
         shape = RoundedCornerShape(20.dp)
     ) {
-
         Box(modifier= Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
@@ -185,7 +182,5 @@ private fun Cart(
                 )
             }
         }
-
     }
-
 }

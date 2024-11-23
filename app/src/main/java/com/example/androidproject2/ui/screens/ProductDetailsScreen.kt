@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,10 +56,8 @@ import com.example.androidproject2.ui.screens.components.ProductPreviewSection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-
 class ProductDetailsViewModel : ViewModel() {
     private val firestoreRepo = FirestoreRepo()
-
 
     fun getCropDetails(cropId: String): Crop {
         val crops = listOf(
@@ -192,7 +192,6 @@ class ProductDetailsViewModel : ViewModel() {
         // Return details like name, image resource, etc. from a local source or hardcoded list.
     }
 
-
     fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val farmers = mutableListOf<Farmer>()
@@ -312,10 +311,7 @@ data class Farmer(
     val cropId: String = "",
     val quantity: Int = 0,
     val location: String=""
-) {
-
-}
-
+)
 
 class FirestoreRepo {
     private val db = FirebaseFirestore.getInstance()
@@ -336,7 +332,6 @@ class FirestoreRepo {
             .addOnFailureListener { exception ->
                 Log.w("FirestoreRepo", "Error getting documents: ", exception)
             }
-
         return farmers // This may need to be adjusted for asynchronous behavior
     }
 }
@@ -405,15 +400,23 @@ fun ProductDetailsScreen(
         Image(
             painter = painterResource(id = cropDetails.cropImage),
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth().height(200.dp)
+            modifier = Modifier.fillMaxWidth().height(200.dp).clip(CircleShape)
         )
-        Text(text = cropDetails.name, style = MaterialTheme.typography.headlineSmall)
+        Column(
+            modifier = Modifier.fillMaxWidth(), // Ensures the Column takes the full width
+            horizontalAlignment = Alignment.CenterHorizontally // Centers content horizontally
+        ) {
+        Text(
+            text = cropDetails.name,
+            style = MaterialTheme.typography.headlineSmall
+        )
         Text(
             text = cropDetails.cropDescription,
             modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
+    }
 
         // Farmers Section
         Text(text = "Farmers Selling This Crop:", style = MaterialTheme.typography.headlineSmall)
@@ -446,7 +449,6 @@ fun OrderScreen(
         quantity.toIntOrNull()?.let { it > 0 && farmer?.quantity?.let { available -> it <= available } == true } ?: false
     }
 
-    // Fetch Farmer Details
     // Fetch Farmer Details
     LaunchedEffect(farmerId) {
         db.collection("crops").document(farmerId).get()
@@ -485,6 +487,7 @@ fun OrderScreen(
     }
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -500,7 +503,6 @@ fun OrderScreen(
 
             Text(text = "Location: ${farmer?.location}", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
-
 
             // Editable Quantity Field
             TextField(

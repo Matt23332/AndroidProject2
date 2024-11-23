@@ -1,7 +1,5 @@
 package com.example.androidproject2.ui.theme
 
-
-
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.FontStyle
@@ -21,8 +19,7 @@ private val UnboundedFontFamily= FontFamily(
     Font(R.font.font_unbounded_bold, FontWeight.Bold, FontStyle.Normal),
     Font(R.font.font_unbounded_regular, FontWeight.Normal,FontStyle.Normal),
     Font(R.font.font_unbounded_light, FontWeight.Bold, FontStyle.Normal),
-
-    )
+)
 
 @Immutable
 data class AppTypography (
@@ -83,6 +80,4 @@ val extendedTypography= AppTypography(
         fontSize = 11.sp,
         fontWeight = FontWeight.Normal
     ),
-
-
-    )
+)

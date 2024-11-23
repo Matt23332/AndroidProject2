@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
-
 @Composable
 fun SuccessScreen(navController: NavController) {
     Column(
@@ -39,4 +38,3 @@ fun SuccessScreen(navController: NavController) {
         }
     }
 }
-

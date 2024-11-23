@@ -1,9 +1,7 @@
 package com.example.androidproject2.data
 
-
 import androidx.annotation.DrawableRes
 import com.example.androidproject2.R
-
 
 data class ProductFlavourState(
     val name:String,
@@ -47,6 +45,5 @@ val ProductFlavourData= listOf(
         name="Potatoes",
         price="Ksh.300 per kg"
     )
-
 
 )

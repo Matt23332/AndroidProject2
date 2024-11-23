@@ -16,7 +16,6 @@ import com.example.androidproject2.data.NutritionState
 import com.example.androidproject2.data.ProductNutritionState
 import com.example.androidproject2.ui.theme.AppTheme
 
-
 @Composable
 fun ProductNutritionSection(
     modifier: Modifier = Modifier,
@@ -33,7 +32,6 @@ fun ProductNutritionSection(
     Row {
         state.nutrition.onEach { item-> NutritionItem(state = item) }
     }
-
 }
 
 @Composable
@@ -41,7 +39,6 @@ private fun SectionHeader (
     modifier: Modifier = Modifier,
     title:String,
     calories: Calories,
-
     ) {
     Row(
         modifier= modifier.fillMaxWidth(),
@@ -67,18 +64,14 @@ private fun SectionHeader (
                 style= AppTheme.typography.titleLarge,
                 color = AppTheme.colors.onBackground
             )
-
         }
     }
-
 }
 
 @Composable
 private fun NutritionItem(
     modifier: Modifier = Modifier,
     state: NutritionState
-
-
 ) {
     Column(
         modifier = modifier,
@@ -95,26 +88,18 @@ private fun NutritionItem(
                 style = AppTheme.typography.titleMedium,
                 color = AppTheme.colors.onBackground,
                 fontWeight = FontWeight.Light,
-
-
                 )
             Text(
                 text = state.unit,
                 style = AppTheme.typography.titleMedium,
                 color = AppTheme.colors.onBackground,
                 fontWeight = FontWeight.Light,
-
-
                 )
-
         }
         Text(
             text = state.title,
             style = AppTheme.typography.label,
             color = AppTheme.colors.onBackground,
-
-
             )
     }
-
 }
