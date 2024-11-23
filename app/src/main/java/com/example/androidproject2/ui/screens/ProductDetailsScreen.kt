@@ -213,7 +213,8 @@ class ProductDetailsViewModel : ViewModel() {
                 quantity = 0,
                 cropImage = R.drawable.wheat, // Replace with your actual drawable resource ID
                 cropDescription = "Wheat is a staple cereal crop that forms the foundation of many diets around the world." +
-                        " It is the primary ingredient in bread, pasta, pastries, and numerous other baked goods." +
+                        " It is the primary ingredient in bread, pasta," +
+                        " pastries, and numerous other baked goods." +
                         " Rich in carbohydrates, wheat also provides dietary fiber, B vitamins, and essential minerals like iron and zinc." +
                         " Whole wheat products are particularly valued for their role in promoting heart health and aiding digestion.",
                 farmerId = "",
