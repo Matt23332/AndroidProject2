@@ -187,7 +187,11 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.sukuma_wiki, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Sukuma wiki, also known as collard greens," +
+                        " is a popular leafy vegetable in East Africa, particularly in Kenya." +
+                        " It is rich in vitamins A, C, and K, calcium, and dietary fiber, making it a nutritious addition to meals. " +
+                        "Typically sautéed with onions, tomatoes, and spices, sukuma wiki is an affordable and versatile dish often" +
+                        " served alongside staples like ugali or rice, promoting health and sustenance.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
