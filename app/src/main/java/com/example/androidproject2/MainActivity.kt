@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 .addOnFailureListener {
-                    Log.e("MainActivity", "Error fetching user role: ${it.message}")
+                    Log.e("MainActivity", "Error fetching user role: ${it.message}. Kindly sign in again ")
                 }
         }
     }
