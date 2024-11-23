@@ -163,7 +163,6 @@ fun CatalogCard(
                 Text(text = stringResource(id = catalog.stringResourceId))
                 Text(text = catalog.price)
             }
-
         }
     }
 }
@@ -192,8 +191,6 @@ fun CatalogList(
     }
 }
 
-
-
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
@@ -219,8 +216,6 @@ fun AppNavigation(navController: NavHostController) {
             val viewModel = ProductDetailsViewModel()
             OrderScreen(navController, farmerId, cropId, viewModel)
         }
-
-
     }
 }
 

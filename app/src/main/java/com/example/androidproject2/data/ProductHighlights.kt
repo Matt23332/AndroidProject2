@@ -1,7 +1,5 @@
 package com.example.androidproject2.data
 
-
-
 import android.text.Highlights
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.androidproject2.ui.theme.AppTheme
 
-
 @Composable
 fun ProductHighlights(
     modifier: Modifier = Modifier,
@@ -36,11 +33,8 @@ fun ProductHighlights(
             Highlight(text = item.text,
                 colors= HighlightDefaults.colors(type = item.type)
             )
-
         }
-
     }
-
 }
 
 @Composable
@@ -59,8 +53,6 @@ private fun Highlight(
             modifier= Modifier.padding(
                 vertical = 10.dp,
                 horizontal= 12.dp
-
-
             )){
             Text(
                 text=text,
@@ -89,7 +81,6 @@ private object HighlightDefaults{
             contentColor = AppTheme.colors.onActionSurface
         )
     }
-
 }
 
 @Immutable

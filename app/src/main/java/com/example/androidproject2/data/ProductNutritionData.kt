@@ -36,6 +36,5 @@ val ProductNutritionData= ProductNutritionState(
             unit="g",
             title = "Protein"
         )
-
     )
 )

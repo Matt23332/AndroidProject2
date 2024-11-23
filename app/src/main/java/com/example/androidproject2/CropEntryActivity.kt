@@ -1,6 +1,5 @@
 package com.example.androidproject2
 
-
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity

@@ -73,7 +73,6 @@ private fun SectionHeader(
             color = AppTheme.colors.onBackground
         )
     }
-
 }
 
 @Composable

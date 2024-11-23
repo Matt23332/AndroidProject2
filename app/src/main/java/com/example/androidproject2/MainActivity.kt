@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         //firebaseAuth.setPersistence(Persistence.PERSISTENT) // Ensures the session is maintained across app restarts.
 
-
         // Check if the user is already logged in
         val currentUser = firebaseAuth.currentUser
         if (currentUser == null) {
@@ -55,41 +54,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-/*
-@Composable
-fun MainScreen(onLogout: () -> Unit) {
-    val currentUser = FirebaseAuth.getInstance().currentUser
-    val context = LocalContext.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Welcome, ${currentUser?.email ?: "User"}!",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(
-            onClick = {
-                context.startActivity(Intent(context, CropEntryActivity::class.java))
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add Crop Info")
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(
-            onClick = { onLogout() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("LOGOUT")
-        }
-    }
-}
-
- */

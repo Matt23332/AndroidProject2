@@ -3,7 +3,6 @@ package com.example.androidproject2.data
 import androidx.annotation.DrawableRes
 import com.example.androidproject2.R
 
-
 data class ProductHighlightState(
     val text:String,
     val type:ProductHighlightType

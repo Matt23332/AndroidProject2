@@ -68,12 +68,9 @@ fun CropListScreen(navController: NavController) {
             ) {
                 Text(text = "Add Crop")
             }
-
-
         } else {
             Text(text = "Please log in to add crops.")
         }
-
     }
 }
 

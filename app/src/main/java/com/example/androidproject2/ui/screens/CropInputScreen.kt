@@ -153,7 +153,6 @@ fun saveCropData(
         }
 }
 
-
 fun validateInputs(
     name: String,
     type: String,

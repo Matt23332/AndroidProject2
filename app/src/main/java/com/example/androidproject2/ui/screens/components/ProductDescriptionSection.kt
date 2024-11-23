@@ -13,7 +13,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.androidproject2.ui.theme.AppTheme
 
-
 @Composable
 fun ProductDescriptionSection(
     modifier: Modifier = Modifier,
@@ -36,9 +35,5 @@ fun ProductDescriptionSection(
             textAlign = TextAlign.Justify,
             modifier = Modifier.fillMaxWidth()
         )
-
-
     }
-
-
 }

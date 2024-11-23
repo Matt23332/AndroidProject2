@@ -17,8 +17,6 @@ class ImageSource {
             Catalog(R.string.crop9, R.drawable.sukuma_wiki,"300 per kg", 300,"link0"),
             Catalog(R.string.crop10, R.drawable.arrow_roots,"500 per kg", 500,"link0"),
             Catalog(R.string.crop11, R.drawable.wheat,"400 per kg", 400,"link0"),
-
-
         )
 
     }

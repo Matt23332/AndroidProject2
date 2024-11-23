@@ -10,28 +10,30 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+// Define farming theme color schemes
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = FieldGreen,
+    onPrimary = NeutralWhite,
+    secondary = LeafGreen,
+    onSecondary = NeutralWhite,
+    background = SoilBrown,
+    onBackground = NeutralWhite,
+    surface = FieldGreen,
+    onSurface = NeutralWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = LeafGreen,
+    onPrimary = NeutralWhite,
+    secondary = SunshineYellow,
+    onSecondary = NeutralDark,
+    background = WheatYellow,
+    onBackground = NeutralDark,
+    surface = NeutralWhite,
+    onSurface = NeutralDark
 )
 
 @Composable
@@ -60,7 +62,6 @@ fun AndroidProject2Theme(
 
 @Composable
 fun AppTheme(
-
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
@@ -68,19 +69,16 @@ fun AppTheme(
         LocalAppTypography provides extendedTypography
     ) {
         MaterialTheme(
-
-
             content = content
         )
     }
-
-
 }
-object AppTheme{
+
+object AppTheme {
     val colors: AppColors
         @Composable
         get() = LocalAppColors.current
     val typography: AppTypography
         @Composable
-        get()= LocalAppTypography.current
+        get() = LocalAppTypography.current
 }
