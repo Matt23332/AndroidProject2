@@ -1,0 +1,1245 @@
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nplugins {\r\n    alias(libs.plugins.android.application) apply false\r\n    alias(libs.plugins.jetbrains.kotlin.android) apply false\r\n    alias(libs.plugins.google.gms.google.services) apply false\r\n}\r\n\r\nbuildscript {\r\n    dependencies {\r\n        classpath(\"com.android.tools.build:gradle:8.5.2\")\r\n        classpath(\"com.google.gms:google-services:4.3.15\")\r\n    }\r\n    // app/build.gradle.kts\r\n\r\n\r\n\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/build.gradle.kts	(date 1732512133337)
+@@ -3,12 +3,13 @@
+     alias(libs.plugins.android.application) apply false
+     alias(libs.plugins.jetbrains.kotlin.android) apply false
+     alias(libs.plugins.google.gms.google.services) apply false
++    alias(libs.plugins.kotlin.compose) apply false
+ }
+ 
+ buildscript {
+     dependencies {
+-        classpath("com.android.tools.build:gradle:8.5.2")
+-        classpath("com.google.gms:google-services:4.3.15")
++        classpath(libs.gradle)
++        classpath(libs.google.services)
+     }
+     // app/build.gradle.kts
+ 
+Index: app/src/main/java/com/example/androidproject2/ui/screens/HomeScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.androidproject2.ui.screens\r\n\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport androidx.navigation.NavHostController\r\nimport androidx.navigation.compose.NavHost\r\nimport androidx.navigation.compose.composable\r\nimport androidx.navigation.compose.currentBackStackEntryAsState\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.automirrored.filled.TrendingUp\r\nimport androidx.compose.material.icons.filled.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.graphics.vector.ImageVector\r\n\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.navigation.NavController\r\nimport com.google.firebase.firestore.FirebaseFirestore\r\n\r\nsealed class Screen(val route: String, val icon: ImageVector, val label: String) {\r\n    object Catalog : Screen(\"catalog\", Icons.Default.Home, \"Catalog\")\r\n    object History : Screen(\"history\", Icons.Default.History, \"History\")\r\n    object Trends : Screen(\"trends\", Icons.AutoMirrored.Filled.TrendingUp, \"Trends\")\r\n    object MyCrops : Screen(\"my crops\", Icons.Default.Agriculture, \"My Crops\")\r\n    object Profile : Screen(\"profile\", Icons.Default.Person, \"Profile\")\r\n}\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun HomeScreen(navController: NavHostController) {\r\n    val bottomNavController = rememberNavController()\r\n    val auth = FirebaseAuth.getInstance()\r\n    val currentUser = auth.currentUser\r\n    val userName = currentUser?.displayName ?: \"User\"\r\n    val farmerId= currentUser?.uid\r\n\r\n    Scaffold(\r\n        topBar = { TopAppBar(title = { Text(\"Welcome, $userName\") }) },\r\n        bottomBar = { BottomNavBar(navController = bottomNavController) }\r\n    ) { innerPadding ->\r\n        NavHost(\r\n            navController = bottomNavController,\r\n            startDestination = Screen.Catalog.route,\r\n            modifier = Modifier.padding(innerPadding)\r\n        ) {\r\n            composable(Screen.Catalog.route) { CatalogScreen(navController) }\r\n            composable(Screen.History.route) { HistoryScreen(navController) }\r\n            composable(Screen.Trends.route) { TrendsScreen() }\r\n            composable(Screen.MyCrops.route) { MyCropsScreen(navController) }\r\n            composable(Screen.Profile.route) {\r\n                val userId = currentUser?.uid\r\n                val userEmail = currentUser?.email ?: \"Email\"\r\n                var userRole by remember { mutableStateOf(\"Loading...\") }\r\n\r\n                val UserId = currentUser?.uid\r\n                LaunchedEffect(UserId) {\r\n                    if (userId != null) {\r\n                        val firestore = FirebaseFirestore.getInstance()\r\n                        firestore.collection(\"users\").document(userId).get()\r\n                            .addOnSuccessListener { document ->\r\n                                userRole = document.getString(\"role\") ?: \"Unknown Role\"\r\n                            }\r\n                            .addOnFailureListener {\r\n                                userRole = \"Error fetching the role\"\r\n                            }\r\n                    } else {\r\n                        userRole = \"User not logged in\"\r\n                    }\r\n                }\r\n                ProfileScreen(\r\n                    userName = userName,\r\n                    userEmail = userEmail,\r\n                    userRole = userRole\r\n                )\r\n            }\r\n            composable(Screen.Profile.route) {EditProfileScreen(navController) }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun BottomNavBar(navController: NavHostController) {\r\n    val screens = listOf(\r\n        Screen.Catalog,\r\n        Screen.History,\r\n        Screen.Trends,\r\n        Screen.MyCrops,\r\n        Screen.Profile\r\n    )\r\n\r\n    val navBackStackEntry by navController.currentBackStackEntryAsState()\r\n    val currentRoute = navBackStackEntry?.destination?.route\r\n\r\n    NavigationBar {\r\n        screens.forEach { screen ->\r\n            NavigationBarItem(\r\n                icon = { Icon(screen.icon, contentDescription = screen.label) },\r\n                label = { Text(screen.label) },\r\n                selected = currentRoute == screen.route,\r\n                onClick = {\r\n                    navController.navigate(screen.route) {\r\n                        popUpTo(navController.graph.startDestinationId) { inclusive = false }\r\n                        launchSingleTop = true\r\n                    }\r\n                }\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n@Composable\r\nfun TrendsScreen() {\r\n    Box(modifier = Modifier.fillMaxSize()) {\r\n        Text(\r\n            text = \"Trends Screen\",\r\n            modifier = Modifier.fillMaxSize(),\r\n            textAlign = TextAlign.Center\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nfun MyCropsScreen(navController: NavController) {\r\n    CropListScreen(navController = navController)\r\n}\r\n\r\n@Composable\r\nfun ProfileScreen(\r\n    userName: String,\r\n    userEmail: String,\r\n    userRole: String,\r\n    modifier: Modifier = Modifier\r\n) {\r\n    val firestore = FirebaseFirestore.getInstance()\r\n    val profilePicUrl = remember { mutableStateOf<String?>(null) }\r\n    val loading = remember { mutableStateOf(true) }\r\n\r\n    LaunchedEffect(Unit) {\r\n        val auth = FirebaseAuth.getInstance()\r\n        val userId = auth.currentUser?.uid\r\n        if (userId != null) {\r\n            firestore.collection(\"users\").document(userId).get()\r\n                .addOnSuccessListener { document ->\r\n                    profilePicUrl.value = document.getString(\"profilePicture\")\r\n                    loading.value = false\r\n                }\r\n                .addOnFailureListener {\r\n                    loading.value = false\r\n                }\r\n        } else {\r\n            loading.value = false\r\n        }\r\n    }\r\n    Surface(modifier = modifier\r\n        .fillMaxSize()\r\n        .padding(16.dp)) {\r\n        if (loading.value) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                CircularProgressIndicator(\r\n                    modifier = Modifier.size(100.dp),\r\n                    strokeWidth = 8.dp\r\n                    )\r\n            }\r\n        } else {\r\n            Column(\r\n                horizontalAlignment = Alignment.CenterHorizontally,\r\n                verticalArrangement = Arrangement.spacedBy(16.dp)\r\n            ) {\r\n                Text(\r\n                    text = \"Name: $userName\",\r\n                    style = MaterialTheme.typography.headlineMedium\r\n                )\r\n                Text(\r\n                    text = \"Email: $userEmail\",\r\n                    style = MaterialTheme.typography.bodyLarge\r\n                )\r\n                Text(\r\n                    text = \"Role: $userRole\",\r\n                    style = MaterialTheme.typography.bodyLarge\r\n                )\r\n                Button(\r\n                    onClick = {},\r\n                    modifier = Modifier.fillMaxWidth()\r\n                ) {\r\n                    Text(\"Edit profile\")\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/androidproject2/ui/screens/HomeScreen.kt b/app/src/main/java/com/example/androidproject2/ui/screens/HomeScreen.kt
+--- a/app/src/main/java/com/example/androidproject2/ui/screens/HomeScreen.kt	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/src/main/java/com/example/androidproject2/ui/screens/HomeScreen.kt	(date 1732488664079)
+@@ -5,7 +5,7 @@
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.text.style.TextAlign
+-import androidx.lifecycle.viewmodel.compose.viewModel
++//import androidx.lifecycle.viewmodel.compose.viewModel
+ import androidx.navigation.NavHostController
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+@@ -17,15 +17,19 @@
+ import androidx.compose.material.icons.filled.*
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.graphics.vector.ImageVector
++import androidx.compose.ui.text.font.FontWeight
+ 
+ import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
+ import androidx.navigation.NavController
++import com.example.androidproject2.model.FinancialTrendsViewModel
+ import com.google.firebase.firestore.FirebaseFirestore
+ 
+ sealed class Screen(val route: String, val icon: ImageVector, val label: String) {
+     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
+     object History : Screen("history", Icons.Default.History, "History")
+-    object Trends : Screen("trends", Icons.AutoMirrored.Filled.TrendingUp, "Trends")
++    object Trends : Screen("weather forecast", Icons.AutoMirrored.Filled.TrendingUp, "Weather")
++    object Financial : Screen("financial trends", Icons.AutoMirrored.Filled.TrendingUp, "Financial")
+     object MyCrops : Screen("my crops", Icons.Default.Agriculture, "My Crops")
+     object Profile : Screen("profile", Icons.Default.Person, "Profile")
+ }
+@@ -43,6 +47,10 @@
+         topBar = { TopAppBar(title = { Text("Welcome, $userName") }) },
+         bottomBar = { BottomNavBar(navController = bottomNavController) }
+     ) { innerPadding ->
++        Button(onClick = { navController.navigate("financial_trends") }) {
++            Text("View Financial Trends")
++        }
++
+         NavHost(
+             navController = bottomNavController,
+             startDestination = Screen.Catalog.route,
+@@ -50,7 +58,7 @@
+         ) {
+             composable(Screen.Catalog.route) { CatalogScreen(navController) }
+             composable(Screen.History.route) { HistoryScreen(navController) }
+-            composable(Screen.Trends.route) { TrendsScreen() }
++            composable(Screen.Trends.route) { WeatherForecastScreen() }
+             composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
+             composable(Screen.Profile.route) {
+                 val userId = currentUser?.uid
+@@ -116,15 +124,59 @@
+ 
+ 
+ @Composable
+-fun TrendsScreen() {
+-    Box(modifier = Modifier.fillMaxSize()) {
++fun WeatherForecastScreen() {
++    var temperature by remember { mutableStateOf(20) }
++    var weatherCondition by remember { mutableStateOf("") }
++
++    Column(
++        modifier = Modifier
++            .fillMaxSize()
++            .padding(16.dp)
++    ) {
+         Text(
+-            text = "Trends Screen",
+-            modifier = Modifier.fillMaxSize(),
+-            textAlign = TextAlign.Center
++            text = "Weather Forecast",
++            fontSize = 24.sp,
++            fontWeight = FontWeight.Bold,
++            modifier = Modifier.padding(bottom = 16.dp)
++        )
++
++        Card(
++            modifier = Modifier
++                .fillMaxWidth()
++                .padding(vertical = 8.dp)
++        ) {
++            Column(
++                modifier = Modifier
++                    .padding(16.dp)
++            ) {
++                Text(
++                    text = "Current Temperature",
++                    fontSize = 16.sp,
++                    modifier = Modifier.padding(bottom = 8.dp)
++                )
++                Text(
++                    text = "$temperature°C",
++                    fontSize = 48.sp,
++                    fontWeight = FontWeight.Bold
++                )
++                Text(
++                    text = weatherCondition,
++                    fontSize = 20.sp,
++                    modifier = Modifier.padding(top = 8.dp)
++                )
++            }
++        }
++
++        // Placeholder for future weather details
++        Spacer(modifier = Modifier.height(16.dp))
++        Text(
++            text = "Future forecast sections will be added here",
++            fontSize = 16.sp,
++            color = MaterialTheme.colorScheme.onSurfaceVariant
+         )
+     }
+ }
++
+ 
+ @Composable
+ fun MyCropsScreen(navController: NavController) {
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.AndroidProject2\"\r\n        tools:targetApi=\"31\">\r\n\r\n        <activity\r\n            android:name=\".LoginActivity\"\r\n            android:exported=\"true\"\r\n            android:label=\"@string/app_name\"\r\n            android:theme=\"@style/Theme.AndroidProject2\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n        <activity\r\n            android:name=\".SignUpActivity\"\r\n            android:exported=\"true\"\r\n            android:label=\"@string/app_name\"\r\n            android:theme=\"@style/Theme.AndroidProject2\" />\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"true\"\r\n            android:label=\"@string/app_name\"\r\n            android:theme=\"@style/Theme.AndroidProject2\" />\r\n        <activity\r\n            android:name=\".data.DbConnection\"\r\n            android:exported=\"true\"\r\n            android:label=\"@string/app_name\"\r\n            android:theme=\"@style/Theme.AndroidProject2\" />\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/src/main/AndroidManifest.xml	(date 1732488476706)
+@@ -12,7 +12,11 @@
+         android:supportsRtl="true"
+         android:theme="@style/Theme.AndroidProject2"
+         tools:targetApi="31">
+-
++        <activity
++            android:name=".ui.screens.FinancialScreen"
++            android:exported="false"
++            android:label="@string/title_activity_financial_screen"
++            android:theme="@style/Theme.AndroidProject2" />
+         <activity
+             android:name=".LoginActivity"
+             android:exported="true"
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    alias(libs.plugins.jetbrains.kotlin.android)\r\n    alias(libs.plugins.google.gms.google.services)\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.example.androidproject2\"\r\n    compileSdk = 35\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.androidproject2\"\r\n        minSdk = 23\r\n        targetSdk = 34\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n        vectorDrawables {\r\n            useSupportLibrary = true\r\n        }\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_1_8\r\n        targetCompatibility = JavaVersion.VERSION_1_8\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"1.8\"\r\n    }\r\n    buildFeatures {\r\n        compose = true\r\n    }\r\n    composeOptions {\r\n        kotlinCompilerExtensionVersion = \"1.5.1\"\r\n    }\r\n    packaging {\r\n        resources {\r\n            excludes += \"/META-INF/{AL2.0,LGPL2.1}\"\r\n        }\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n   implementation(libs.firebase.firestore)\r\n    implementation(libs.androidx.material.icons.extended)\r\n    implementation(libs.ui)\r\n    implementation(libs.androidx.constraintlayout.compose)\r\n    implementation (libs.androidx.navigation.compose.v270)// Check for the latest version\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.lifecycle.runtime.ktx)\r\n    implementation(libs.androidx.activity.compose)\r\n    implementation(platform(libs.androidx.compose.bom))\r\n    implementation(libs.androidx.ui)\r\n    implementation(libs.androidx.ui.graphics)\r\n    implementation(libs.androidx.ui.tooling.preview)\r\n    implementation(libs.androidx.material3)\r\n    implementation(libs.firebase.auth)\r\n    implementation(libs.androidx.media3.effect)\r\n    implementation(libs.androidx.constraintlayout)\r\n    implementation(libs.androidx.navigation.compose)\r\n    implementation(libs.androidx.room.common)\r\n    implementation(libs.androidx.room.runtime.android)\r\n    implementation(libs.androidx.appcompat)\r\n    implementation(libs.material)\r\n    implementation(libs.androidx.activity)\r\n    implementation(libs.coil.compose)\r\n    implementation(libs.firebase.storage.ktx)\r\n    //implementation(libs.firebase.vertexai)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n    androidTestImplementation(platform(libs.androidx.compose.bom))\r\n    androidTestImplementation(libs.androidx.ui.test.junit4)\r\n    debugImplementation(libs.androidx.ui.tooling)\r\n    debugImplementation(libs.androidx.ui.test.manifest)\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/build.gradle.kts	(date 1732488476579)
+@@ -2,6 +2,7 @@
+     alias(libs.plugins.android.application)
+     alias(libs.plugins.jetbrains.kotlin.android)
+     alias(libs.plugins.google.gms.google.services)
++    alias(libs.plugins.kotlin.compose)
+ }
+ 
+ android {
+@@ -31,11 +32,11 @@
+         }
+     }
+     compileOptions {
+-        sourceCompatibility = JavaVersion.VERSION_1_8
+-        targetCompatibility = JavaVersion.VERSION_1_8
++        sourceCompatibility = JavaVersion.VERSION_11
++        targetCompatibility = JavaVersion.VERSION_11
+     }
+     kotlinOptions {
+-        jvmTarget = "1.8"
++        jvmTarget = "11"
+     }
+     buildFeatures {
+         compose = true
+@@ -68,6 +69,7 @@
+     implementation(libs.firebase.auth)
+     implementation(libs.androidx.media3.effect)
+     implementation(libs.androidx.constraintlayout)
++    //implementation(androidx.constraintlayout:constraintlayout-compose:1.0.1)
+     implementation(libs.androidx.navigation.compose)
+     implementation(libs.androidx.room.common)
+     implementation(libs.androidx.room.runtime.android)
+@@ -76,6 +78,10 @@
+     implementation(libs.androidx.activity)
+     implementation(libs.coil.compose)
+     implementation(libs.firebase.storage.ktx)
++    implementation (libs.retrofit)
++    implementation (libs.converter.gson)
++    implementation(libs.androidx.espresso.core)
++
+     //implementation(libs.firebase.vertexai)
+     testImplementation(libs.junit)
+     androidTestImplementation(libs.androidx.junit)
+@@ -84,4 +90,5 @@
+     androidTestImplementation(libs.androidx.ui.test.junit4)
+     debugImplementation(libs.androidx.ui.tooling)
+     debugImplementation(libs.androidx.ui.test.manifest)
++    lintChecks("androidx.constraintlayout:constraintlayout-compose:1.1.0")
+ }
+\ No newline at end of file
+Index: .idea/deviceManager.xml
+===================================================================
+diff --git a/.idea/deviceManager.xml b/.idea/deviceManager.xml
+deleted file mode 100644
+--- a/.idea/deviceManager.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ /dev/null	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
+@@ -1,17 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="DeviceTable">
+-    <option name="columnSorters">
+-      <list>
+-        <ColumnSorterState>
+-          <option name="column" value="Type" />
+-          <option name="order" value="ASCENDING" />
+-        </ColumnSorterState>
+-        <ColumnSorterState>
+-          <option name="column" value="API" />
+-          <option name="order" value="ASCENDING" />
+-        </ColumnSorterState>
+-      </list>
+-    </option>
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/.gitignore
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+--- a/.idea/.gitignore	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ /dev/null	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
+@@ -1,3 +0,0 @@
+-# Default ignored files
+-/shelf/
+-/workspace.xml
+Index: .idea/other.xml
+===================================================================
+diff --git a/.idea/other.xml b/.idea/other.xml
+deleted file mode 100644
+--- a/.idea/other.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ /dev/null	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
+@@ -1,329 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="direct_access_persist.xml">
+-    <option name="deviceSelectionList">
+-      <list>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="27" />
+-          <option name="brand" value="DOCOMO" />
+-          <option name="codename" value="F01L" />
+-          <option name="id" value="F01L" />
+-          <option name="manufacturer" value="FUJITSU" />
+-          <option name="name" value="F-01L" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1280" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="28" />
+-          <option name="brand" value="DOCOMO" />
+-          <option name="codename" value="SH-01L" />
+-          <option name="id" value="SH-01L" />
+-          <option name="manufacturer" value="SHARP" />
+-          <option name="name" value="AQUOS sense2 SH-01L" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2160" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="Lenovo" />
+-          <option name="codename" value="TB370FU" />
+-          <option name="id" value="TB370FU" />
+-          <option name="manufacturer" value="Lenovo" />
+-          <option name="name" value="Tab P12" />
+-          <option name="screenDensity" value="340" />
+-          <option name="screenX" value="1840" />
+-          <option name="screenY" value="2944" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="31" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="a51" />
+-          <option name="id" value="a51" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy A51" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="akita" />
+-          <option name="id" value="akita" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="b0q" />
+-          <option name="id" value="b0q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S22 Ultra" />
+-          <option name="screenDensity" value="600" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="3088" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="32" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="bluejay" />
+-          <option name="id" value="bluejay" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 6a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="caiman" />
+-          <option name="id" value="caiman" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="960" />
+-          <option name="screenY" value="2142" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="comet" />
+-          <option name="id" value="comet" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro Fold" />
+-          <option name="screenDensity" value="390" />
+-          <option name="screenX" value="2076" />
+-          <option name="screenY" value="2152" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="29" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="crownqlteue" />
+-          <option name="id" value="crownqlteue" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Note9" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2220" />
+-          <option name="screenY" value="1080" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="dm3q" />
+-          <option name="id" value="dm3q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S23 Ultra" />
+-          <option name="screenDensity" value="600" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="3088" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="e1q" />
+-          <option name="id" value="e1q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S24" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix" />
+-          <option name="id" value="felix" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix" />
+-          <option name="id" value="felix" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix_camera" />
+-          <option name="id" value="felix_camera" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold (Camera-enabled)" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gts8uwifi" />
+-          <option name="id" value="gts8uwifi" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Tab S8 Ultra" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="1848" />
+-          <option name="screenY" value="2960" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="husky" />
+-          <option name="id" value="husky" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8 Pro" />
+-          <option name="screenDensity" value="390" />
+-          <option name="screenX" value="1008" />
+-          <option name="screenY" value="2244" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="java" />
+-          <option name="id" value="java" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="G20" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1600" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="komodo" />
+-          <option name="id" value="komodo" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro XL" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="1008" />
+-          <option name="screenY" value="2244" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="lynx" />
+-          <option name="id" value="lynx" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 7a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="31" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="oriole" />
+-          <option name="id" value="oriole" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 6" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="panther" />
+-          <option name="id" value="panther" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 7" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="q5q" />
+-          <option name="id" value="q5q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Z Fold5" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1812" />
+-          <option name="screenY" value="2176" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="q6q" />
+-          <option name="id" value="q6q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Z Fold6" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1856" />
+-          <option name="screenY" value="2160" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="r11" />
+-          <option name="id" value="r11" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Watch" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="384" />
+-          <option name="screenY" value="384" />
+-          <option name="type" value="WEAR_OS" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="redfin" />
+-          <option name="id" value="redfin" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 5" />
+-          <option name="screenDensity" value="440" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="shiba" />
+-          <option name="id" value="shiba" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="tangorpro" />
+-          <option name="id" value="tangorpro" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Tablet" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="1600" />
+-          <option name="screenY" value="2560" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="tokay" />
+-          <option name="id" value="tokay" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2424" />
+-        </PersistentDeviceSelectionData>
+-      </list>
+-    </option>
+-  </component>
+-</project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/androidproject2/ui/screens/components/CustomLineChart.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/androidproject2/ui/screens/components/CustomLineChart.kt b/app/src/main/java/com/example/androidproject2/ui/screens/components/CustomLineChart.kt
+new file mode 100644
+--- /dev/null	(date 1732483542026)
++++ b/app/src/main/java/com/example/androidproject2/ui/screens/components/CustomLineChart.kt	(date 1732483542026)
+@@ -0,0 +1,94 @@
++package com.example.androidproject2.ui.screens.components
++
++import androidx.compose.foundation.Canvas
++import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material3.Card
++import androidx.compose.material3.CardDefaults
++import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.Path
++import androidx.compose.ui.unit.dp
++
++data class ChartData(val x: Float, val y: Float)
++
++@Composable
++fun CustomLineChart(
++    data: List<ChartData>,
++    modifier: Modifier = Modifier,
++    lineColor: Color = Color.Blue,
++    pointColor: Color = Color.Red
++) {
++    Card(
++        modifier = modifier
++            .padding(16.dp)
++            .fillMaxWidth()
++            .height(200.dp),
++        shape = RoundedCornerShape(8.dp),
++        elevation = CardDefaults.cardElevation(4.dp)
++    ) {
++        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
++            val width = constraints.maxWidth.toFloat()
++            val height = constraints.maxHeight.toFloat()
++
++            val maxX = data.maxOf { it.x }
++            val maxY = data.maxOf { it.y }
++
++            Canvas(modifier = Modifier.fillMaxSize()) {
++                // Draw line
++                val path = Path()
++                data.forEachIndexed { index, point ->
++                    val x = (point.x / maxX) * width
++                    val y = height - (point.y / maxY) * height
++
++                    if (index == 0) {
++                        path.moveTo(x, y)
++                    } else {
++                        path.lineTo(x, y)
++                    }
++                }
++                drawPath(path, color = lineColor, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f))
++
++                // Draw points
++                data.forEach { point ->
++                    val x = (point.x / maxX) * width
++                    val y = height - (point.y / maxY) * height
++                    drawCircle(color = pointColor, radius = 8f, center = Offset(x, y))
++                }
++            }
++        }
++    }
++}
++
++@Composable
++fun FinancialTrendsScreen() {
++    val sampleData = listOf(
++        ChartData(1f, 100f),
++        ChartData(2f, 200f),
++        ChartData(3f, 150f),
++        ChartData(4f, 300f),
++        ChartData(5f, 250f)
++    )
++
++    Column(
++        modifier = Modifier
++            .fillMaxSize()
++            .padding(16.dp),
++        verticalArrangement = Arrangement.spacedBy(16.dp)
++    ) {
++        Text(
++            text = "Financial Trends",
++            style = MaterialTheme.typography.headlineMedium
++        )
++
++        Text("Revenue Over Time", style = MaterialTheme.typography.titleLarge)
++        CustomLineChart(data = sampleData)
++
++        Text("Forecasting Trends", style = MaterialTheme.typography.titleLarge)
++        CustomLineChart(data = sampleData.map { ChartData(it.x, it.y * 1.2f) })
++    }
++}
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"app\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2024-11-11T18:18:55.381726187Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=/home/victoria-mwaura/.android/avd/Pixel_Fold_API_35.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n      <SelectionState runConfigName=\"CatalogCardPreview\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/deploymentTargetSelector.xml	(date 1732485047910)
+@@ -4,17 +4,6 @@
+     <selectionStates>
+       <SelectionState runConfigName="app">
+         <option name="selectionMode" value="DROPDOWN" />
+-        <DropdownSelection timestamp="2024-11-11T18:18:55.381726187Z">
+-          <Target type="DEFAULT_BOOT">
+-            <handle>
+-              <DeviceId pluginId="LocalEmulator" identifier="path=/home/victoria-mwaura/.android/avd/Pixel_Fold_API_35.avd" />
+-            </handle>
+-          </Target>
+-        </DropdownSelection>
+-        <DialogSelection />
+-      </SelectionState>
+-      <SelectionState runConfigName="CatalogCardPreview">
+-        <option name="selectionMode" value="DROPDOWN" />
+       </SelectionState>
+     </selectionStates>
+   </component>
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Mon Nov 11 18:55:03 EAT 2024\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-bin.zip\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+--- a/gradle/wrapper/gradle-wrapper.properties	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/gradle/wrapper/gradle-wrapper.properties	(date 1732486713048)
+@@ -1,6 +1,6 @@
+ #Mon Nov 11 18:55:03 EAT 2024
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+Index: app/src/main/java/com/example/androidproject2/ui/screens/FinancialTrendsScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/androidproject2/ui/screens/FinancialTrendsScreen.kt b/app/src/main/java/com/example/androidproject2/ui/screens/FinancialTrendsScreen.kt
+new file mode 100644
+--- /dev/null	(date 1732483541714)
++++ b/app/src/main/java/com/example/androidproject2/ui/screens/FinancialTrendsScreen.kt	(date 1732483541714)
+@@ -0,0 +1,85 @@
++package com.example.androidproject2.ui.screens
++
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Card
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.collectAsState
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.tooling.preview.Preview
++import androidx.compose.ui.unit.dp
++import com.example.androidproject2.model.FinancialTrendsViewModel
++import com.example.androidproject2.model.ForecastDataPoint
++import com.example.androidproject2.model.RevenueDataPoint
++import java.text.SimpleDateFormat
++import java.util.Calendar
++import kotlin.text.*
++
++@Composable
++fun FinancialTrendsScreen(viewModel: FinancialTrendsViewModel) {  // Corrected ViewModel type
++    // Collect data from ViewModel
++    val revenueData = viewModel.revenueData.collectAsState().value
++    val forecastData = viewModel.forecastData.collectAsState().value
++
++    Column(modifier = Modifier.padding(16.dp)) {
++        Text("Total Revenue: Ksh ${viewModel.totalRevenue.formatToKsh()}")
++
++        Text("Revenue Data:")
++        revenueData.forEach { dataPoint ->
++            RevenueItem(dataPoint, monthOffset = -1)
++        }
++
++        Text("Forecast Data:")
++        forecastData.forEach { dataPoint ->
++            ForecastItem(dataPoint, monthOffset = 1)
++        }
++    }
++}
++
++@Composable
++fun RevenueItem(revenueDataPoint: RevenueDataPoint, monthOffset: Int) {
++    Card(modifier = Modifier.padding(bottom = 8.dp)) {
++        Column(modifier = Modifier.padding(8.dp)) {
++            // Display date in 'yyyy-MM-dd' format
++            Text("Date: ${SimpleDateFormat("yyyy-MM-dd").format(revenueDataPoint.date.time)}")
++            // Display revenue in Ksh with proper formatting
++            Text("Revenue: Ksh ${revenueDataPoint.revenue.formatToKsh()}")
++        }
++    }
++}
++
++@Composable
++fun ForecastItem(forecastDataPoint: ForecastDataPoint, monthOffset: Int) {
++    // Increment the forecast date by monthOffset months
++    val forecastDate = forecastDataPoint.date.apply {
++        add(Calendar.MONTH, monthOffset)
++    }
++
++    // Calculate the forecast amount by multiplying by 18% for each new forecast
++    val forecastAmount = forecastDataPoint.forecast * Math.pow(1.18, monthOffset.toDouble())
++
++    Card(modifier = Modifier.padding(bottom = 8.dp)) {
++        Column(modifier = Modifier.padding(8.dp)) {
++            // Display the updated forecast date
++            Text("Date: ${SimpleDateFormat("yyyy-MM-dd").format(forecastDate.time)}")
++            // Display the forecasted amount with Ksh
++            Text("Forecast: Ksh ${forecastAmount.formatToKsh()}")
++        }
++    }
++}
++
++// Extension function to format amounts in Kenyan Shillings
++fun Double.formatToKsh(): String {
++    return String.format("%,.2f", this)
++}
++
++@Preview(showBackground = true)
++@Composable
++fun PreviewFinancialTrends() {
++    // Initialize the ViewModel correctly for preview
++    val viewModel = FinancialTrendsViewModel()
++
++    // Show the FinancialTrendsScreen composable with the ViewModel
++    FinancialTrendsScreen(viewModel = viewModel)
++}
+Index: .idea/inspectionProfiles/Project_Default.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><component name=\"InspectionProjectProfileManager\">\r\n  <profile version=\"1.0\">\r\n    <option name=\"myName\" value=\"Project Default\" />\r\n    <inspection_tool class=\"PreviewAnnotationInFunctionWithParameters\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewApiLevelMustBeValid\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewDimensionRespectsLimit\" enabled=\"true\" level=\"WARNING\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewFontScaleMustBeGreaterThanZero\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewMultipleParameterProviders\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewMustBeTopLevelFunction\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewNeedsComposableAnnotation\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewNotSupportedInUnitTestFiles\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n    <inspection_tool class=\"PreviewPickerAnnotation\" enabled=\"true\" level=\"ERROR\" enabled_by_default=\"true\">\r\n      <option name=\"composableFile\" value=\"true\" />\r\n      <option name=\"previewFile\" value=\"true\" />\r\n    </inspection_tool>\r\n  </profile>\r\n</component>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/inspectionProfiles/Project_Default.xml b/.idea/inspectionProfiles/Project_Default.xml
+--- a/.idea/inspectionProfiles/Project_Default.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/inspectionProfiles/Project_Default.xml	(date 1732512076637)
+@@ -1,41 +1,47 @@
+ <component name="InspectionProjectProfileManager">
+   <profile version="1.0">
+     <option name="myName" value="Project Default" />
+-    <inspection_tool class="PreviewAnnotationInFunctionWithParameters" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="ComposePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
++      <option name="composableFile" value="true" />
++    </inspection_tool>
++    <inspection_tool class="ComposePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
++      <option name="composableFile" value="true" />
++    </inspection_tool>
++    <inspection_tool class="ComposePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewApiLevelMustBeValid" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="ComposePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
++    <inspection_tool class="GlancePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewFontScaleMustBeGreaterThanZero" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="GlancePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewMultipleParameterProviders" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="GlancePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
++      <option name="composableFile" value="true" />
++    </inspection_tool>
++    <inspection_tool class="GlancePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="PreviewAnnotationInFunctionWithParameters" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="PreviewApiLevelMustBeValid" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+-    <inspection_tool class="PreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
++    <inspection_tool class="PreviewDeviceShouldUseNewSpec" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
++    </inspection_tool>
++    <inspection_tool class="PreviewFontScaleMustBeGreaterThanZero" enabled="true" level="ERROR" enabled_by_default="true">
++      <option name="composableFile" value="true" />
++    </inspection_tool>
++    <inspection_tool class="PreviewMultipleParameterProviders" enabled="true" level="ERROR" enabled_by_default="true">
++      <option name="composableFile" value="true" />
+     </inspection_tool>
+     <inspection_tool class="PreviewPickerAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+       <option name="composableFile" value="true" />
+-      <option name="previewFile" value="true" />
+     </inspection_tool>
+   </profile>
+ </component>
+\ No newline at end of file
+Index: app/src/main/java/com/example/androidproject2/ui/screens/CatalogScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.androidproject2.ui.screens\r\n\r\nimport androidx.compose.foundation.Image\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.lazy.LazyColumn\r\nimport androidx.compose.foundation.lazy.items\r\nimport androidx.compose.material3.Card\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Surface\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.LaunchedEffect\r\nimport androidx.compose.runtime.mutableStateOf\r\nimport androidx.compose.runtime.remember\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.layout.ContentScale\r\nimport androidx.compose.ui.platform.LocalContext\r\nimport androidx.compose.ui.platform.LocalLayoutDirection\r\nimport androidx.compose.ui.res.painterResource\r\nimport androidx.compose.ui.res.stringResource\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.NavHostController\r\nimport androidx.navigation.NavType\r\nimport androidx.navigation.compose.NavHost\r\nimport androidx.navigation.compose.composable\r\nimport androidx.navigation.compose.rememberNavController\r\nimport androidx.navigation.navArgument\r\nimport com.example.androidproject2.data.ImageSource\r\nimport com.example.androidproject2.model.Catalog\r\nimport com.example.androidproject2.R\r\n\r\n/*\r\n@Composable\r\nfun CatalogScreen() {\r\n    val products = ImageSource().loadStock()\r\n\r\n    LazyColumn(modifier = Modifier.padding(16.dp)) {\r\n        items(products) { product ->\r\n            Row(modifier = Modifier\r\n                .fillMaxWidth()\r\n                .padding(8.dp)) {\r\n                Image(\r\n                    painter = painterResource(id = product.imageResourceId),\r\n                    contentDescription = stringResource(id = product.stringResourceId), // Fix here\r\n                    modifier = Modifier.size(64.dp)\r\n                )\r\n                Spacer(modifier = Modifier.width(16.dp))\r\n                Column {\r\n                    Text(text = stringResource(id = product.stringResourceId)) // Fix here\r\n                    Text(text = product.price)\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n/*@Composable\r\nfun CatalogScreen(modifier: Modifier = Modifier) {\r\n    val layoutDirection = LocalLayoutDirection.current\r\n    Surface(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .statusBarsPadding()\r\n            .padding(\r\n                start = WindowInsets.safeDrawing\r\n                    .asPaddingValues()\r\n                    .calculateStartPadding(layoutDirection),\r\n                end = WindowInsets.safeDrawing\r\n                    .asPaddingValues()\r\n                    .calculateEndPadding(layoutDirection),\r\n            ),) {\r\n        CatalogList(catalogList = ImageSource().loadStock(),)\r\n    }\r\n\r\n\r\n}*/\r\n\r\n@Composable\r\nfun CatalogCard(\r\n    catalog: Catalog,\r\n    onClick: () -> Unit={},\r\n    modifier: Modifier= Modifier\r\n) {\r\n    Card(modifier = modifier) {\r\n        Column {\r\n            Image(\r\n                painter = painterResource(id = catalog.imageResourceId) ,\r\n                contentDescription = stringResource( catalog.stringResourceId, catalog.price, catalog.ProductLink),\r\n                modifier = Modifier\r\n                    .fillMaxWidth()\r\n                    .height(194.dp),\r\n                contentScale = ContentScale.Crop\r\n\r\n                )\r\n            Text(\r\n                text = LocalContext.current.getString(catalog.stringResourceId, catalog.price, catalog.ProductLink),\r\n                modifier = Modifier.padding(16.dp),\r\n                style = MaterialTheme.typography.headlineSmall\r\n            )\r\n        }\r\n\r\n    }\r\n\r\n\r\n}*/\r\n@Composable\r\nfun CatalogScreen(navController: NavController) {\r\n    val products = ImageSource().loadStock()\r\n\r\n    LazyColumn(modifier = Modifier.padding(16.dp)) {\r\n        items(products) { product ->\r\n            CatalogCard(\r\n                catalog = product,\r\n                navController = navController\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun CatalogCard(\r\n    catalog: Catalog,\r\n    navController: NavController,\r\n    modifier: Modifier = Modifier\r\n) {\r\n    Card(modifier = modifier\r\n        .padding(vertical = 16.dp)\r\n        .fillMaxWidth()\r\n        .clickable {\r\n            // Map the string resource ID to a cropId\r\n            val cropId = when (catalog.imageResourceId) {\r\n                R.drawable.beans -> \"beans\"\r\n                R.drawable.rice -> \"rice\"\r\n                R.drawable.bananas -> \"bananas\"\r\n                R.drawable.oranges -> \"oranges\"\r\n                R.drawable.grapes -> \"grapes\"\r\n                R.drawable.maize -> \"maize\"\r\n                R.drawable.potatoes -> \"potatoes\"\r\n                R.drawable.cabbage -> \"cabbage\"\r\n                R.drawable.sukuma_wiki -> \"sukuma wiki\"\r\n                R.drawable.arrow_roots -> \"arrow roots\"\r\n                R.drawable.wheat -> \"wheat\"\r\n                else -> \"unknown\"\r\n            }\r\n            navController.navigate(\"product_details/$cropId\")\r\n            navController.navigate(\"product_details/${cropId.ifEmpty { \"unknown\" }}\")\r\n        }\r\n    ) {\r\n        Row(modifier = Modifier.padding(16.dp)) {\r\n            Image(\r\n                painter = painterResource(id = catalog.imageResourceId),\r\n                contentDescription = stringResource(id = catalog.stringResourceId),\r\n                modifier = Modifier.size(64.dp),\r\n                contentScale = ContentScale.Crop\r\n            )\r\n            Spacer(modifier = Modifier.width(16.dp))\r\n            Column {\r\n                Text(text = stringResource(id = catalog.stringResourceId))\r\n                Text(text = catalog.price)\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n/*\r\n@Preview\r\n@Composable\r\nfun CatalogCardPreview(modifier: Modifier = Modifier) {\r\n    CatalogCard(\r\n        catalog = Catalog(R.string.crop1, R.drawable.beans,\"250 Per kg\", 250, \"link\" ))\r\n\r\n}*/\r\n\r\n@Composable\r\nfun CatalogList(\r\n    catalogList: List<Catalog>,\r\n    navController: NavController,\r\n    modifier: Modifier = Modifier\r\n) {\r\n    val selectedCrop = remember { mutableStateOf<Catalog?>(null) } // Initialize selectedCrop as a state\r\n\r\n    LazyColumn(modifier = modifier) {\r\n        items(catalogList) { crop ->\r\n            CatalogCard(catalog = crop, navController)\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun AppNavigation(navController: NavHostController) {\r\n    NavHost(navController = navController, startDestination = \"home\") {\r\n        composable(\"home\") { HomeScreen(navController) }\r\n        composable(\r\n            \"product_details/{cropId}\",\r\n            arguments = listOf(navArgument(\"cropId\") { type = NavType.StringType })\r\n        ) { backStackEntry ->\r\n            val cropId = backStackEntry.arguments?.getString(\"cropId\") ?: \"\"\r\n            val viewModel = ProductDetailsViewModel()\r\n            ProductDetailsScreen(navController, cropId, viewModel)\r\n        }\r\n        composable(\"crop_input\"){ CropInputScreen(navController)}\r\n        composable(\r\n            route = \"order_screen/{farmerId}/{cropId}\",\r\n            arguments = listOf(\r\n                navArgument(\"farmerId\") { type = NavType.StringType },\r\n                navArgument(\"cropId\") { type = NavType.StringType }\r\n            )\r\n        ) { backStackEntry ->\r\n            val farmerId = backStackEntry.arguments?.getString(\"farmerId\") ?: \"\"\r\n            val cropId = backStackEntry.arguments?.getString(\"cropId\") ?: \"\"\r\n            val viewModel = ProductDetailsViewModel()\r\n            OrderScreen(navController, farmerId, cropId, viewModel)\r\n        }\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/androidproject2/ui/screens/CatalogScreen.kt b/app/src/main/java/com/example/androidproject2/ui/screens/CatalogScreen.kt
+--- a/app/src/main/java/com/example/androidproject2/ui/screens/CatalogScreen.kt	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/src/main/java/com/example/androidproject2/ui/screens/CatalogScreen.kt	(date 1732483541374)
+@@ -6,33 +6,35 @@
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material3.Card
+-import androidx.compose.material3.MaterialTheme
+-import androidx.compose.material3.Surface
++//import androidx.compose.material3.MaterialTheme
++//import androidx.compose.material3.Surface
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.LaunchedEffect
++//import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+-import androidx.compose.ui.Alignment
++//import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.layout.ContentScale
+-import androidx.compose.ui.platform.LocalContext
+-import androidx.compose.ui.platform.LocalLayoutDirection
++//import androidx.compose.ui.platform.LocalContext
++//import androidx.compose.ui.platform.LocalLayoutDirection
+ import androidx.compose.ui.res.painterResource
+ import androidx.compose.ui.res.stringResource
+-import androidx.compose.ui.tooling.preview.Preview
++//import androidx.compose.ui.tooling.preview.Preview
+ import androidx.compose.ui.unit.dp
+-import androidx.lifecycle.viewmodel.compose.viewModel
++//import androidx.lifecycle.viewmodel.compose.viewModel
+ import androidx.navigation.NavController
+ import androidx.navigation.NavHostController
+ import androidx.navigation.NavType
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+-import androidx.navigation.compose.rememberNavController
++//import androidx.navigation.compose.rememberNavController
+ import androidx.navigation.navArgument
+ import com.example.androidproject2.data.ImageSource
+ import com.example.androidproject2.model.Catalog
+ import com.example.androidproject2.R
++import androidx.lifecycle.viewmodel.compose.viewModel
++import com.example.androidproject2.model.FinancialTrendsViewModel
+ 
+ /*
+ @Composable
+@@ -200,10 +202,16 @@
+             arguments = listOf(navArgument("cropId") { type = NavType.StringType })
+         ) { backStackEntry ->
+             val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+-            val viewModel = ProductDetailsViewModel()
++            // Get the ProductDetailsViewModel using the viewModel() function
++            val viewModel: ProductDetailsViewModel = viewModel()
+             ProductDetailsScreen(navController, cropId, viewModel)
+         }
+-        composable("crop_input"){ CropInputScreen(navController)}
++        composable("crop_input") { CropInputScreen(navController) }
++        composable("financial_trends") {
++            val viewModel: FinancialTrendsViewModel = viewModel() // Automatically creates or retrieves the ViewModel
++            FinancialTrendsScreen(viewModel)
++        }
++
+         composable(
+             route = "order_screen/{farmerId}/{cropId}",
+             arguments = listOf(
+@@ -213,9 +221,8 @@
+         ) { backStackEntry ->
+             val farmerId = backStackEntry.arguments?.getString("farmerId") ?: ""
+             val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+-            val viewModel = ProductDetailsViewModel()
++            val viewModel: ProductDetailsViewModel = viewModel()  // Correct way to get ViewModel
+             OrderScreen(navController, farmerId, cropId, viewModel)
+         }
+     }
+ }
+-
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\r\nagp = \"8.5.2\"\r\ncoilCompose = \"2.5.0\"\r\nconstraintlayoutCompose = \"1.1.0\"\r\nfirebaseFirestore = \"25.1.1\"\r\nkotlin = \"1.9.0\"\r\ncoreKtx = \"1.15.0\"\r\njunit = \"4.13.2\"\r\njunitVersion = \"1.2.1\"\r\nespressoCore = \"3.6.1\"\r\nlifecycleRuntimeKtx = \"2.8.7\"\r\nactivityCompose = \"1.9.3\"\r\ncomposeBom = \"2024.04.01\"\r\ngoogleGmsGoogleServices = \"4.4.2\"\r\nfirebaseAuth = \"23.1.0\"\r\nmaterialIconsExtended = \"1.7.5\"\r\nmedia3Effect = \"1.4.1\"\r\nfirebaseVertexai = \"16.0.1\"\r\nconstraintlayout = \"2.2.0\"\r\nnavigationCompose = \"2.8.3\"\r\nnavigationComposeVersion = \"2.7.0\"\r\nui = \"1.7.5\"\r\nroomCommon = \"2.6.1\"\r\nroomRuntimeAndroid = \"2.7.0-alpha11\"\r\nappcompat = \"1.7.0\"\r\nmaterial = \"1.12.0\"\r\nactivity = \"1.9.3\"\r\nfirebaseStorageKtx = \"21.0.1\"\r\n\r\n[libraries]\r\nandroidx-constraintlayout-compose = { module = \"androidx.constraintlayout:constraintlayout-compose\", version.ref = \"constraintlayoutCompose\" }\r\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\r\nandroidx-material-icons-extended = { module = \"androidx.compose.material:material-icons-extended\", version.ref = \"materialIconsExtended\" }\r\nandroidx-navigation-compose-v270 = { module = \"androidx.navigation:navigation-compose\", version.ref = \"navigationComposeVersion\" }\r\ncoil-compose = { module = \"io.coil-kt:coil-compose\", version.ref = \"coilCompose\" }\r\nfirebase-firestore = { module = \"com.google.firebase:firebase-firestore\", version.ref = \"firebaseFirestore\" }\r\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\r\nandroidx-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\r\nandroidx-espresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\r\nandroidx-lifecycle-runtime-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-runtime-ktx\", version.ref = \"lifecycleRuntimeKtx\" }\r\nandroidx-activity-compose = { group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activityCompose\" }\r\nandroidx-compose-bom = { group = \"androidx.compose\", name = \"compose-bom\", version.ref = \"composeBom\" }\r\nandroidx-ui = { group = \"androidx.compose.ui\", name = \"ui\" }\r\nandroidx-ui-graphics = { group = \"androidx.compose.ui\", name = \"ui-graphics\" }\r\nandroidx-ui-tooling = { group = \"androidx.compose.ui\", name = \"ui-tooling\" }\r\nandroidx-ui-tooling-preview = { group = \"androidx.compose.ui\", name = \"ui-tooling-preview\" }\r\nandroidx-ui-test-manifest = { group = \"androidx.compose.ui\", name = \"ui-test-manifest\" }\r\nandroidx-ui-test-junit4 = { group = \"androidx.compose.ui\", name = \"ui-test-junit4\" }\r\nandroidx-material3 = { group = \"androidx.compose.material3\", name = \"material3\" }\r\nfirebase-auth = { group = \"com.google.firebase\", name = \"firebase-auth\", version.ref = \"firebaseAuth\" }\r\nandroidx-media3-effect = { group = \"androidx.media3\", name = \"media3-effect\", version.ref = \"media3Effect\" }\r\nfirebase-vertexai = { group = \"com.google.firebase\", name = \"firebase-vertexai\", version.ref = \"firebaseVertexai\" }\r\nandroidx-constraintlayout = { group = \"androidx.constraintlayout\", name = \"constraintlayout\", version.ref = \"constraintlayout\" }\r\nandroidx-navigation-compose = { group = \"androidx.navigation\", name = \"navigation-compose\", version.ref = \"navigationCompose\" }\r\nui = { module = \"androidx.compose.ui:ui\", version.ref = \"ui\" }\r\nandroidx-room-common = { group = \"androidx.room\", name = \"room-common\", version.ref = \"roomCommon\" }\r\nandroidx-room-runtime-android = { group = \"androidx.room\", name = \"room-runtime-android\", version.ref = \"roomRuntimeAndroid\" }\r\nandroidx-appcompat = { group = \"androidx.appcompat\", name = \"appcompat\", version.ref = \"appcompat\" }\r\nmaterial = { group = \"com.google.android.material\", name = \"material\", version.ref = \"material\" }\r\nandroidx-activity = { group = \"androidx.activity\", name = \"activity\", version.ref = \"activity\" }\r\nfirebase-storage-ktx = { group = \"com.google.firebase\", name = \"firebase-storage-ktx\", version.ref = \"firebaseStorageKtx\" }\r\n\r\n[plugins]\r\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\r\njetbrains-kotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\r\ngoogle-gms-google-services = { id = \"com.google.gms.google-services\", version.ref = \"googleGmsGoogleServices\" }\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/gradle/libs.versions.toml	(date 1732512133284)
+@@ -1,8 +1,11 @@
+ [versions]
+-agp = "8.5.2"
++agp = "8.7.2"
+ coilCompose = "2.5.0"
+ constraintlayoutCompose = "1.1.0"
++converterGson = "2.9.0"
+ firebaseFirestore = "25.1.1"
++googleServices = "4.4.2"
++gradle = "8.7.2"
+ kotlin = "1.9.0"
+ coreKtx = "1.15.0"
+ junit = "4.13.2"
+@@ -19,6 +22,7 @@
+ constraintlayout = "2.2.0"
+ navigationCompose = "2.8.3"
+ navigationComposeVersion = "2.7.0"
++retrofit = "2.9.0"
+ ui = "1.7.5"
+ roomCommon = "2.6.1"
+ roomRuntimeAndroid = "2.7.0-alpha11"
+@@ -33,7 +37,10 @@
+ androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+ androidx-navigation-compose-v270 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
+ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
++converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+ firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
++google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
++gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+ junit = { group = "junit", name = "junit", version.ref = "junit" }
+ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+@@ -52,6 +59,7 @@
+ firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai", version.ref = "firebaseVertexai" }
+ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+ androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
++retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+ ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+ androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+ androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
+@@ -64,4 +72,5 @@
+ android-application = { id = "com.android.application", version.ref = "agp" }
+ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
++kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ 
+Index: .idea/appInsightsSettings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AppInsightsSettings\">\r\n    <option name=\"selectedTabId\" value=\"Firebase Crashlytics\" />\r\n    <option name=\"tabSettings\">\r\n      <map>\r\n        <entry key=\"Firebase Crashlytics\">\r\n          <value>\r\n            <InsightsFilterSettings>\r\n              <option name=\"connection\">\r\n                <ConnectionSetting>\r\n                  <option name=\"appId\" value=\"com.example.androidproject2\" />\r\n                  <option name=\"mobileSdkAppId\" value=\"1:311632387005:android:1dcddb08043e14fa52d0d4\" />\r\n                  <option name=\"projectId\" value=\"signup-9dcc0\" />\r\n                  <option name=\"projectNumber\" value=\"311632387005\" />\r\n                </ConnectionSetting>\r\n              </option>\r\n              <option name=\"signal\" value=\"SIGNAL_UNSPECIFIED\" />\r\n              <option name=\"timeIntervalDays\" value=\"THIRTY_DAYS\" />\r\n              <option name=\"visibilityType\" value=\"ALL\" />\r\n            </InsightsFilterSettings>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/appInsightsSettings.xml b/.idea/appInsightsSettings.xml
+--- a/.idea/appInsightsSettings.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/appInsightsSettings.xml	(date 1732485781322)
+@@ -1,7 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="AppInsightsSettings">
+-    <option name="selectedTabId" value="Firebase Crashlytics" />
+     <option name="tabSettings">
+       <map>
+         <entry key="Firebase Crashlytics">
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"VcsDirectoryMappings\">\r\n    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+--- a/.idea/vcs.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/vcs.xml	(date 1732484580866)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="VcsDirectoryMappings">
+-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++    <mapping directory="" vcs="Git" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"#GRADLE_LOCAL_JAVA_HOME\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/gradle.xml	(date 1732512077691)
+@@ -4,6 +4,7 @@
+   <component name="GradleSettings">
+     <option name="linkedExternalProjectsSettings">
+       <GradleProjectSettings>
++        <option name="testRunner" value="CHOOSE_PER_TEST" />
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+         <option name="modules">
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CompilerConfiguration\">\r\n    <bytecodeTargetLevel target=\"17\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+--- a/.idea/compiler.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/compiler.xml	(date 1732484580726)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="CompilerConfiguration">
+-    <bytecodeTargetLevel target="17" />
++    <bytecodeTargetLevel target="21" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/androidproject2/model/FinancialTrendsViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/androidproject2/model/FinancialTrendsViewModel.kt b/app/src/main/java/com/example/androidproject2/model/FinancialTrendsViewModel.kt
+new file mode 100644
+--- /dev/null	(date 1732483541281)
++++ b/app/src/main/java/com/example/androidproject2/model/FinancialTrendsViewModel.kt	(date 1732483541281)
+@@ -0,0 +1,41 @@
++package com.example.androidproject2.model
++
++import androidx.lifecycle.ViewModel
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.StateFlow
++import java.util.Calendar
++
++data class RevenueDataPoint(val date: Calendar, val revenue: Double)
++data class ForecastDataPoint(val date: Calendar, val forecast: Double)
++
++class FinancialTrendsViewModel : ViewModel() {
++    private val _revenueData = MutableStateFlow<List<RevenueDataPoint>>(emptyList())
++    val revenueData: StateFlow<List<RevenueDataPoint>> = _revenueData
++
++    private val _forecastData = MutableStateFlow<List<ForecastDataPoint>>(emptyList())
++    val forecastData: StateFlow<List<ForecastDataPoint>> = _forecastData
++
++    val totalRevenue: Double
++        get() = _revenueData.value.sumOf { it.revenue }
++
++    init {
++        loadFinancialData()
++    }
++
++    private fun loadFinancialData() {
++        val calendar = Calendar.getInstance()
++
++        _revenueData.value = listOf(
++            RevenueDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, -30) }, 200.0),
++            RevenueDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, -20) }, 225.0),
++            RevenueDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, -10) }, 240.0),
++            RevenueDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, 0) }, 270.0)
++        )
++
++        _forecastData.value = listOf(
++            ForecastDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, 10) }, 300.0),
++            ForecastDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, 20) }, 330.0),
++            ForecastDataPoint(calendar.apply { add(Calendar.DAY_OF_YEAR, 30) }, 350.0)
++        )
++    }
++}
+Index: app/src/main/res/values/themes.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<resources>\r\n    <style name=\"Theme.AndroidProject2\" parent=\"android:Theme.Material.Light.NoActionBar\" />\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/themes.xml b/app/src/main/res/values/themes.xml
+--- a/app/src/main/res/values/themes.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/src/main/res/values/themes.xml	(date 1732488476740)
+@@ -1,4 +1,5 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
++
+     <style name="Theme.AndroidProject2" parent="android:Theme.Material.Light.NoActionBar" />
+ </resources>
+\ No newline at end of file
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">AndroidProject2</string>\r\n    <string name=\"crop1\">Beans</string>\r\n    <string name=\"crop2\">Rice</string>\r\n    <string name=\"crop3\">Bananas</string>\r\n    <string name=\"crop4\">Oranges</string>\r\n    <string name=\"crop5\">Grapes</string>\r\n    <string name=\"crop6\">Maize</string>\r\n    <string name=\"crop7\">Potatoes</string>\r\n    <string name=\"crop8\">Cabbage</string>\r\n    <string name=\"crop9\">Sukuma Wiki</string>\r\n    <string name=\"crop10\">Arrow Roots</string>\r\n    <string name=\"crop11\">Wheat</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/app/src/main/res/values/strings.xml	(date 1732488476299)
+@@ -11,4 +11,5 @@
+     <string name="crop9">Sukuma Wiki</string>
+     <string name="crop10">Arrow Roots</string>
+     <string name="crop11">Wheat</string>
++    <string name="title_activity_financial_screen">FinancialScreen</string>
+ </resources>
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_17\" default=\"true\" project-jdk-name=\"jbr-17\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision c6e2093bb6dbfdc9889d0c64dec5049ebed49ce1)
++++ b/.idea/misc.xml	(date 1732485047770)
+@@ -1,6 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>
+   <component name="ProjectType">
