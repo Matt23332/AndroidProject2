@@ -1,5 +1,7 @@
 package com.example.androidproject2.ui.CustomerScreens
 
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,12 +43,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.androidproject2.LoginActivity
 import com.example.androidproject2.ui.screens.CatalogScreen
 import com.example.androidproject2.ui.screens.CropListScreen
 import com.example.androidproject2.ui.screens.EditProfileScreen
 import com.example.androidproject2.ui.screens.HistoryScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import androidx.compose.ui.platform.LocalContext
 
 sealed class Screen(val route: String, val icon: ImageVector, val label: String) {
     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
@@ -61,7 +66,6 @@ fun CustomerScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val userName = currentUser?.displayName ?: "User"
-    val customerId= currentUser?.uid
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Welcome, $userName") }) },
@@ -74,34 +78,8 @@ fun CustomerScreen(navController: NavHostController) {
         ) {
             composable(Screen.Catalog.route) { CatalogScreen(navController) }
             composable(Screen.History.route) { HistoryScreen(navController) }
-
-            composable(Screen.Profile.route) {
-                val userId = currentUser?.uid
-                val userEmail = currentUser?.email ?: "Email"
-                var userRole by remember { mutableStateOf("Loading...") }
-
-                val UserId = currentUser?.uid
-                LaunchedEffect(UserId) {
-                    if (userId != null) {
-                        val firestore = FirebaseFirestore.getInstance()
-                        firestore.collection("users").document(userId).get()
-                            .addOnSuccessListener { document ->
-                                userRole = document.getString("role") ?: "Unknown Role"
-                            }
-                            .addOnFailureListener {
-                                userRole = "Error fetching the role"
-                            }
-                    } else {
-                        userRole = "User not logged in"
-                    }
-                }
-                ProfileScreen(
-                    userName = userName,
-                    userEmail = userEmail,
-                    userRole = userRole
-                )
-            }
-            composable(Screen.Profile.route) { EditProfileScreen(navController) }
+            composable(Screen.Profile.route) { ProfileScreen(navController) }
+            composable("EditProfileScreen") { EditProfileScreen(navController) }
         }
     }
 }
@@ -134,40 +112,51 @@ fun BottomNavBar(navController: NavHostController) {
     }
 }
 
-
-
-
-
 @Composable
 fun ProfileScreen(
-    userName: String,
-    userEmail: String,
-    userRole: String,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val context = android.content.ContextWrapper(LocalContext.current)
     val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+
+    val userEmail = currentUser?.email
+    var userName by remember { mutableStateOf(currentUser?.displayName ?: "") }
+    var userRole by remember { mutableStateOf("Loading...") }
     val profilePicUrl = remember { mutableStateOf<String?>(null) }
     val loading = remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        val auth = FirebaseAuth.getInstance()
-        val userId = auth.currentUser?.uid
-        if (userId != null) {
-            firestore.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    profilePicUrl.value = document.getString("profilePicture")
+    LaunchedEffect(userEmail) {
+        if (userEmail != null) {
+            firestore.collection("users")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val document = querySnapshot.documents.firstOrNull()
+                    if (document != null) {
+                        userName = document.getString("name") ?: ""
+                        userRole = document.getString("role") ?: "Unknown Role"
+                        profilePicUrl.value = document.getString("profilePicture")
+                    }
                     loading.value = false
                 }
                 .addOnFailureListener {
+                    userRole = "Error fetching the role"
                     loading.value = false
                 }
         } else {
+            userRole = "User not logged in"
             loading.value = false
         }
     }
-    Surface(modifier = modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+
+    Surface(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         if (loading.value) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -188,7 +177,7 @@ fun ProfileScreen(
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = "Email: $userEmail",
+                    text = "Email: ${userEmail ?: "N/A"}",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
@@ -196,10 +185,21 @@ fun ProfileScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Button(
-                    onClick = {},
+                    onClick = { navController.navigate("EditProfileScreen") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Edit profile")
+                    Text("Edit Profile")
+                }
+                Button(
+                    onClick = {
+                        auth.signOut()
+                        val intent = Intent(context, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Logout")
                 }
             }
         }

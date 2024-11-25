@@ -1,5 +1,7 @@
 package com.example.androidproject2.ui.screens
 
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.androidproject2.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -30,11 +34,12 @@ import com.google.firebase.auth.UserProfileChangeRequest
 
 @Composable
 fun EditProfileScreen(navController: NavController) {
+    val context = android.content.ContextWrapper(LocalContext.current)
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    val userId = currentUser?.uid ?: ""
+    val userEmail = currentUser?.email ?: ""
 
     var username by remember { mutableStateOf(currentUser?.displayName ?: "") }
     var email by remember { mutableStateOf(currentUser?.email ?: "") }
@@ -42,10 +47,16 @@ fun EditProfileScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (userId.isNotEmpty()) {
-            firestore.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    profilePictureUrl = document.getString("profilePicture")
+        if (userEmail.isNotEmpty()) {
+            firestore.collection("users")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val document = querySnapshot.documents.firstOrNull()
+                    if (document != null) {
+                        username = document.getString("name") ?: ""
+                        profilePictureUrl = document.getString("profilePicture")
+                    }
                 }
         }
     }
@@ -82,31 +93,44 @@ fun EditProfileScreen(navController: NavController) {
                     onClick = {
                         isLoading = true
 
-                        // Update Firestore user data
-                        val updates = mapOf(
-                            "name" to username,
-                            "email" to email,
-                        )
-                        firestore.collection("users").document(userId).update(updates)
-                            .addOnSuccessListener {
-                                // Verify email update and update user profile display name
-                                currentUser?.let { user ->
-                                    user.verifyBeforeUpdateEmail(email)
-                                    user.updateProfile(
-                                        UserProfileChangeRequest.Builder() // Corrected line here
-                                            .setDisplayName(username)
-                                            .build()
-                                    ).addOnCompleteListener { profileUpdateTask ->
-                                        isLoading = false // Stop loading indicator after profile update completes
+                        firestore.collection("users")
+                            .whereEqualTo("email", userEmail)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                val document = querySnapshot.documents.firstOrNull()
+                                if (document != null) {
+                                    val documentId = document.id
+                                    val updates = mapOf(
+                                        "name" to username,
+                                        "email" to email,
+                                    )
+                                    firestore.collection("users").document(documentId)
+                                        .update(updates)
+                                        .addOnSuccessListener {
+                                            currentUser?.let { user ->
+                                                user.verifyBeforeUpdateEmail(email)
+                                                user.updateProfile(
+                                                    UserProfileChangeRequest.Builder()
+                                                        .setDisplayName(username)
+                                                        .build()
+                                                ).addOnCompleteListener { profileUpdateTask ->
+                                                    isLoading = false
 
-                                        if (profileUpdateTask.isSuccessful) {
-                                            navController.popBackStack() // Navigate back after successful update
-                                        } else {
-                                            // Handle failure to update profile (optional)
+                                                    if (profileUpdateTask.isSuccessful) {
+                                                        navController.popBackStack()
+                                                    } else {
+
+                                                    }
+                                                }
+                                            } ?: run {
+                                                isLoading = false
+                                            }
                                         }
-                                    }
-                                } ?: run {
-                                    isLoading = false // Handle case where currentUser is null (optional)
+                                        .addOnFailureListener {
+                                            isLoading = false
+                                        }
+                                } else {
+                                    isLoading = false
                                 }
                             }
                             .addOnFailureListener {
@@ -116,6 +140,17 @@ fun EditProfileScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Save Changes")
+                }
+                Button(
+                    onClick = {
+                        auth.signOut()
+                        val intent = Intent(context, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Logout")
                 }
             }
         }
