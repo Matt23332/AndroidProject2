@@ -30,10 +30,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 import com.example.androidproject2.R
 import com.example.androidproject2.data.Crop
-
+import com.example.androidproject2.data.OrderData
+import com.example.androidproject2.data.OrderState
+import com.example.androidproject2.data.ProductDescriptionData
+import com.example.androidproject2.data.ProductFlavourData
+import com.example.androidproject2.data.ProductFlavourState
+import com.example.androidproject2.data.ProductNutritionData
+import com.example.androidproject2.data.ProductNutritionState
+import com.example.androidproject2.data.ProductPreviewState
+import com.example.androidproject2.ui.screens.components.FlavourSection
+import com.example.androidproject2.ui.screens.components.OrderActionBar
+import com.example.androidproject2.ui.screens.components.ProductDescriptionSection
+import com.example.androidproject2.ui.screens.components.ProductNutritionSection
+import com.example.androidproject2.ui.screens.components.ProductPreviewSection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -50,12 +67,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.beans, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are highly nutritious legumes that are a staple food in many cultures around the world." +
-                        " Available in a wide variety of types, such as black beans, kidney beans, lentils, and chickpeas," +
-                        " they are rich in protein, fiber, vitamins, and minerals like iron and folate. Beans are an excellent plant-based protein source," +
-                        " making them ideal for vegetarians and vegans. They are versatile in cooking, used in soups, stews, salads, and as side dishes." +
-                        " Beyond their nutritional benefits, beans promote heart health, aid digestion, and help maintain steady blood sugar levels," +
-                        " making them a wholesome and sustainable food choice.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -66,10 +78,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.rice, // Replace with your actual drawable resource ID
-                cropDescription = "Rice is a staple food for more than half the world’s population, known for its versatility and adaptability in various cuisines." +
-                        " It comes in many varieties, including white, brown, and aromatic types like basmati or jasmine. Rich in carbohydrates, rice provides energy " +
-                        "and is often fortified with essential nutrients like iron and B vitamins. It pairs well with vegetables, meats, and spices, making it a " +
-                        "cornerstone in dishes ranging from stir-fries to risottos and curries.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -80,12 +89,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.bananas, // Replace with your actual drawable resource ID
-                cropDescription = "Bananas are one of the world's most popular fruits, known for their sweet taste," +
-                        " creamy texture, and rich nutritional value. " +
-                        "They are elongated, yellow-skinned fruits that grow in clusters on tropical plants belonging to the genus *Musa*." +
-                        " Bananas are an excellent source of essential nutrients, including potassium, vitamin B6, vitamin C, and dietary fiber," +
-                        " making them a great choice for energy and digestion. Easy to peel and eat, bananas are versatile, often enjoyed raw, in smoothies," +
-                        " or as an ingredient in baking and cooking. Their natural sugars and low-fat content make them a healthy snack for people of all ages.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -96,10 +100,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.oranges, // Replace with your actual drawable resource ID
-                cropDescription = "Oranges are juicy, citrus fruits prized for their refreshing taste and rich nutritional profile." +
-                        " Packed with vitamin C, they boost the immune system and provide antioxidants that promote skin health and " +
-                        "fight free radicals. Oranges are versatile, enjoyed fresh, as juice, or as an ingredient in salads, desserts, and marinades." +
-                        " Their tangy sweetness makes them a popular snack, while their fiber content aids digestion and supports overall health. ",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -110,11 +111,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.grapes, // Replace with your actual drawable resource ID
-                cropDescription = "Grapes are small, sweet, and juicy fruits that grow in clusters and are enjoyed fresh, " +
-                        "dried as raisins, or processed into products like wine, juice, and jelly. " +
-                        "They are rich in antioxidants, particularly resveratrol, which supports heart health and combats inflammation." +
-                        " Grapes come in various colors, including red, green, and purple, and their natural sweetness makes them a healthy, " +
-                        "portable snack that’s also used in desserts and salads.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -125,12 +122,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.maize, // Replace with your actual drawable resource ID
-                cropDescription = "Maize, also known as corn, is a versatile and globally important cereal crop. " +
-                        "It serves as a dietary staple in many regions and is consumed in various forms, including fresh, " +
-                        "dried, or processed into flour, snacks, or syrups. Maize is rich in carbohydrates, providing a " +
-                        "significant source of energy, and also contains essential vitamins like B-complex and minerals like magnesium. " +
-                        "Beyond human consumption, maize is a key ingredient in animal feed and industrial products like biofuel," +
-                        " underscoring its economic significance.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -141,10 +133,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.potatoes, // Replace with your actual drawable resource ID
-                cropDescription = "Potatoes are nutrient-dense tubers and one of the world's most widely consumed vegetables." +
-                        " They are rich in carbohydrates, fiber, and vitamins like C and B6, as well as potassium, which supports heart health." +
-                        " Versatile in the kitchen, potatoes can be boiled, roasted, mashed, or fried, and are the base for countless dishes" +
-                        " across different cuisines. Their mild flavor and adaptability make them a culinary favorite globally.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -155,11 +144,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.cabbage, // Replace with your actual drawable resource ID
-                cropDescription = "Cabbage is a leafy vegetable belonging to the cruciferous family," +
-                        " known for its dense nutrient content and culinary versatility." +
-                        " It is rich in vitamins C and K, dietary fiber, and antioxidants, which promote digestion, " +
-                        "boost immunity, and support heart health. Cabbage can be eaten raw in salads, fermented as sauerkraut," +
-                        " or cooked in soups and stir-fries, making it a staple in many global cuisines.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -170,11 +155,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.sukuma_wiki, // Replace with your actual drawable resource ID
-                cropDescription = "Sukuma wiki, also known as collard greens," +
-                        " is a popular leafy vegetable in East Africa, particularly in Kenya." +
-                        " It is rich in vitamins A, C, and K, calcium, and dietary fiber, making it a nutritious addition to meals. " +
-                        "Typically sautéed with onions, tomatoes, and spices, sukuma wiki is an affordable and versatile dish often" +
-                        " served alongside staples like ugali or rice, promoting health and sustenance.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -185,10 +166,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.arrow_roots, // Replace with your actual drawable resource ID
-                cropDescription = "Arrowroots are starchy tubers that are highly valued for their easy digestibility and nutritional benefits." +
-                        " They are a rich source of carbohydrates and provide essential minerals like calcium and potassium. Often boiled or steamed, " +
-                        "arrowroots are consumed as a healthy alternative to potatoes or other root crops." +
-                        " Their mild flavor makes them a versatile ingredient in soups, baked goods, and traditional dishes.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -199,11 +177,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.wheat, // Replace with your actual drawable resource ID
-                cropDescription = "Wheat is a staple cereal crop that forms the foundation of many diets around the world." +
-                        " It is the primary ingredient in bread, pasta," +
-                        " pastries, and numerous other baked goods." +
-                        " Rich in carbohydrates, wheat also provides dietary fiber, B vitamins, and essential minerals like iron and zinc." +
-                        " Whole wheat products are particularly valued for their role in promoting heart health and aiding digestion.",
+                cropDescription = "Beans are a good source of protein and essential nutrients.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -219,7 +193,7 @@ class ProductDetailsViewModel : ViewModel() {
     }
 
 
-  /*  fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
+    fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val farmers = mutableListOf<Farmer>()
 
@@ -242,42 +216,51 @@ class ProductDetailsViewModel : ViewModel() {
                 Log.e("Firestore", "Error fetching farmers: ${exception.message}")
                 onComplete(emptyList()) // If the fetch fails, return an empty list
             }
-    }*/
-
-
-    fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val farmers = mutableListOf<Farmer>()
-
-        db.collection("crops") // Assuming the collection is "crops"
-            .whereEqualTo("name", cropId) // Use "cropId" instead of "name"
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val farmer = Farmer(
-                        id = document.id,
-                        name = document.getString("name") ?: "Unknown",
-                        FarmerName = document.getString("farmerName") ?: "Unknown",
-                        //cropId = document.getString("cropId") ?: "",
-                        quantity = document.getLong("quantity")?.toInt() ?: 0,
-                        location = document.getString("location") ?: "Unknown"
-                    )
-                    farmers.add(farmer)
-                }
-                onComplete(farmers) // Return the fetched list of farmers
-            }
-            .addOnFailureListener { exception ->
-                Log.e("Firestore", "Error fetching farmers: ${exception.message}")
-                onComplete(emptyList()) // If the fetch fails, return an empty list
-            }
     }
 
 
+    /*  fun placeOrder(
+        cropId: String,
+        farmerId: String,
+        orderQuantity: Int,
+        farmerName: String,
+        customerId: String,
+        customerName: String,
+        location: String,
+        deliveryAddress: String
+        ) {
+        val db = FirebaseFirestore.getInstance()
+        val farmerRef = db.collection("crops").document(farmerId)
 
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(farmerRef)
+            val currentQuantity = snapshot.getLong("quantity")?.toInt() ?: 0
 
+            if (currentQuantity >= orderQuantity) {
+                transaction.update(farmerRef, "quantity", currentQuantity - orderQuantity)
+                // Add sale record
+                val sale = hashMapOf(
+                    "farmerId" to farmerId,
+                    "farmerName" to farmerName,
+                    "customerId" to customerId,
+                    "customerName" to customerName,
+                    "cropId" to cropId,
+                    "quantity" to orderQuantity,
+                    "location" to location,
+                    "deliveryAddress" to deliveryAddress,
+                    "timestamp" to System.currentTimeMillis() // Add a timestamp for sorting
+                )
+                db.collection("sales").add(sale)
+            } else {
+                throw Exception("Order quantity exceeds available stock.")
+            }
+        }.addOnSuccessListener {
+            Log.d("Order", "Order placed successfully for $orderQuantity kg")
+        }.addOnFailureListener { e ->
+            Log.e("Order", "Order failed: ${e.message}")
+        }
 
-
-
+}*/
 
     fun placeOrder(
         cropId: String,
@@ -448,7 +431,7 @@ fun ProductDetailsScreen(
 fun OrderScreen(
     navController: NavController,
     farmerId: String,
-    cropName: String,
+    cropId: String,
     viewModel: ProductDetailsViewModel
 ) {
     val db = FirebaseFirestore.getInstance()
@@ -464,23 +447,17 @@ fun OrderScreen(
     }
 
     // Fetch Farmer Details
-    LaunchedEffect(farmerId, cropName) {
-        db.collection("crops")
-            .whereEqualTo("name", cropName)
-            .whereEqualTo("farmerId", farmerId) // Filter by farmerId
-            .get()
-            .addOnSuccessListener { result ->
-                if (result.documents.isNotEmpty()) {
-                    val document = result.documents.first()
-                    farmer = Farmer(
-                        id = document.getString("farmerId") ?: "Unknown",
-                        FarmerName = document.getString("farmerName") ?: "Unknown",
-                        name = document.getString("name") ?: "",
-                        quantity = document.getLong("quantity")?.toInt() ?: 0,
-                        location = document.getString("location") ?: ""
-                    )
-                    cropLocation = farmer?.location ?: "Unknown Location"
-                }
+    // Fetch Farmer Details
+    LaunchedEffect(farmerId) {
+        db.collection("crops").document(farmerId).get()
+            .addOnSuccessListener { document ->
+                farmer = Farmer(
+                    id = document.id,
+                    FarmerName = document.getString("farmerName") ?: "Unknown",
+                    name = document.getString("name") ?: "",
+                    quantity = document.getLong("quantity")?.toInt() ?: 0,
+                    location = document.getString("location") ?: ""
+                )
             }
             .addOnFailureListener { exception ->
                 Log.e("OrderScreen", "Error fetching farmer details: ${exception.message}")
@@ -494,6 +471,17 @@ fun OrderScreen(
             customerId = currentUser.uid
             customerName = currentUser.displayName ?: "Unknown"
         }
+    }
+
+    // Fetch Crop Location
+    LaunchedEffect(cropId) {
+        db.collection("crops").document(cropId).get()
+            .addOnSuccessListener { document ->
+                cropLocation = document.getString("location") ?: "Unknown Location"
+            }
+            .addOnFailureListener { exception ->
+                Log.e("OrderScreen", "Error fetching crop location: ${exception.message}")
+            }
     }
 
     Column(
@@ -543,10 +531,11 @@ fun OrderScreen(
             // Submit Order Button
             TextButton(
                 onClick = {
+
                     if (isQuantityValid && deliveryAddress.isNotBlank()) {
                         val orderQuantity = quantity.toInt()
                         viewModel.placeOrder(
-                            cropId = cropName,
+                            cropId = cropId,
                             farmerId = farmerId,
                             orderQuantity = orderQuantity,
                             farmerName = farmer?.FarmerName ?: "Unknown",
@@ -558,7 +547,7 @@ fun OrderScreen(
                         navController.popBackStack() // Navigate back after placing the order
                     }
                 },
-                enabled = isQuantityValid && deliveryAddress.isNotBlank(),
+                enabled = isQuantityValid && deliveryAddress.isNotBlank() && cropLocation.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Place Order")
@@ -566,7 +555,6 @@ fun OrderScreen(
         }
     }
 }
-
 
 
 
