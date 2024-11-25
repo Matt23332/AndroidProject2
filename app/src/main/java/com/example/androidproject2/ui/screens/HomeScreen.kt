@@ -5,7 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewmodel.compose.viewModel
+//import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,6 +43,10 @@ fun HomeScreen(navController: NavHostController) {
         topBar = { TopAppBar(title = { Text("Welcome, $userName") }) },
         bottomBar = { BottomNavBar(navController = bottomNavController) }
     ) { innerPadding ->
+        Button(onClick = { navController.navigate("financial_trends") }) {
+            Text("View Financial Trends")
+        }
+
         NavHost(
             navController = bottomNavController,
             startDestination = Screen.Catalog.route,
