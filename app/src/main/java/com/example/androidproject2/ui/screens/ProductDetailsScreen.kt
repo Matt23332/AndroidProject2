@@ -142,7 +142,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.maize, // Replace with your actual drawable resource ID
-                cropDescription = "Maize, also known as corn, is a versatile and globally important cereal crop. " +
+                cropDescription = "Maiz e, also known as corn, is a versatile and globally important cereal crop. " +
                         "It serves as a dietary staple in many regions and is consumed in various forms, including fresh, " +
                         "dried, or processed into flour, snacks, or syrups. Maize is rich in carbohydrates, providing a " +
                         "significant source of energy, and also contains essential vitamins like B-complex and minerals like magnesium. " +
