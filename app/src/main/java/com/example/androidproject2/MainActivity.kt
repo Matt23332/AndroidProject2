@@ -2,55 +2,66 @@ package com.example.androidproject2
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject2.ui.screens.AppNavigation
-import com.example.androidproject2.ui.screens.HomeScreen
+import com.example.androidproject2.ui.CustomerScreens.CustomerScreen
+import com.example.androidproject2.ui.screens.FarmerNavigation
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.local.Persistence
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class MainActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
+    private val firestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         firebaseAuth = FirebaseAuth.getInstance()
-        //firebaseAuth.setPersistence(Persistence.PERSISTENT) // Ensures the session is maintained across app restarts.
-
-        // Check if the user is already logged in
         val currentUser = firebaseAuth.currentUser
+
         if (currentUser == null) {
-            // If not logged in, navigate to LoginActivity
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         } else {
-            // If logged in, show the HomeScreen
-            setContent {
-                val navController = rememberNavController()
-                AppNavigation(navController)
+            CoroutineScope(Dispatchers.Main).launch {
+                val role = getUserRole(currentUser.uid)
+                setContent {
+                    val navController = rememberNavController()
+                    when (role) {
+                        "farmer" -> FarmerNavigation(navController)
+                        "customer" -> CustomerScreen(navController)
+                        else -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Unknown role. Redirecting to default page...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            AppNavigation(navController)
+                        }
+                    }
+                }
             }
         }
     }
+    private suspend fun getUserRole(userId: String): String {
+        return try {
+            val snapshot = firestore.collection("users").document(userId).get().await()
+            snapshot.getString("role") ?: "unkown"
+        } catch ( e: Exception) {
+            Log.e("MainActivity", "Error fetching role: ${e.message}")
+            "unkown"
+        }
+    }
 }
-

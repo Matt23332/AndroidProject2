@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,8 +54,10 @@ import com.example.androidproject2.ui.screens.components.ProductPreviewSection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+
 class ProductDetailsViewModel : ViewModel() {
     private val firestoreRepo = FirestoreRepo()
+
 
     fun getCropDetails(cropId: String): Crop {
         val crops = listOf(
@@ -67,7 +67,12 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.beans, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Beans are highly nutritious legumes that are a staple food in many cultures around the world." +
+                        " Available in a wide variety of types, such as black beans, kidney beans, lentils, and chickpeas," +
+                        " they are rich in protein, fiber, vitamins, and minerals like iron and folate. Beans are an excellent plant-based protein source," +
+                        " making them ideal for vegetarians and vegans. They are versatile in cooking, used in soups, stews, salads, and as side dishes." +
+                        " Beyond their nutritional benefits, beans promote heart health, aid digestion, and help maintain steady blood sugar levels," +
+                        " making them a wholesome and sustainable food choice.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -78,7 +83,10 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.rice, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Rice is a staple food for more than half the world’s population, known for its versatility and adaptability in various cuisines." +
+                        " It comes in many varieties, including white, brown, and aromatic types like basmati or jasmine. Rich in carbohydrates, rice provides energy " +
+                        "and is often fortified with essential nutrients like iron and B vitamins. It pairs well with vegetables, meats, and spices, making it a " +
+                        "cornerstone in dishes ranging from stir-fries to risottos and curries.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -89,7 +97,12 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.bananas, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Bananas are one of the world's most popular fruits, known for their sweet taste," +
+                        " creamy texture, and rich nutritional value. " +
+                        "They are elongated, yellow-skinned fruits that grow in clusters on tropical plants belonging to the genus *Musa*." +
+                        " Bananas are an excellent source of essential nutrients, including potassium, vitamin B6, vitamin C, and dietary fiber," +
+                        " making them a great choice for energy and digestion. Easy to peel and eat, bananas are versatile, often enjoyed raw, in smoothies," +
+                        " or as an ingredient in baking and cooking. Their natural sugars and low-fat content make them a healthy snack for people of all ages.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -100,7 +113,10 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.oranges, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Oranges are juicy, citrus fruits prized for their refreshing taste and rich nutritional profile." +
+                        " Packed with vitamin C, they boost the immune system and provide antioxidants that promote skin health and " +
+                        "fight free radicals. Oranges are versatile, enjoyed fresh, as juice, or as an ingredient in salads, desserts, and marinades." +
+                        " Their tangy sweetness makes them a popular snack, while their fiber content aids digestion and supports overall health. ",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -111,7 +127,11 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.grapes, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Grapes are small, sweet, and juicy fruits that grow in clusters and are enjoyed fresh, " +
+                        "dried as raisins, or processed into products like wine, juice, and jelly. " +
+                        "They are rich in antioxidants, particularly resveratrol, which supports heart health and combats inflammation." +
+                        " Grapes come in various colors, including red, green, and purple, and their natural sweetness makes them a healthy, " +
+                        "portable snack that’s also used in desserts and salads.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -122,7 +142,12 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.maize, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Maize, also known as corn, is a versatile and globally important cereal crop. " +
+                        "It serves as a dietary staple in many regions and is consumed in various forms, including fresh, " +
+                        "dried, or processed into flour, snacks, or syrups. Maize is rich in carbohydrates, providing a " +
+                        "significant source of energy, and also contains essential vitamins like B-complex and minerals like magnesium. " +
+                        "Beyond human consumption, maize is a key ingredient in animal feed and industrial products like biofuel," +
+                        " underscoring its economic significance.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -133,7 +158,10 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.potatoes, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Potatoes are nutrient-dense tubers and one of the world's most widely consumed vegetables." +
+                        " They are rich in carbohydrates, fiber, and vitamins like C and B6, as well as potassium, which supports heart health." +
+                        " Versatile in the kitchen, potatoes can be boiled, roasted, mashed, or fried, and are the base for countless dishes" +
+                        " across different cuisines. Their mild flavor and adaptability make them a culinary favorite globally.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -144,7 +172,11 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.cabbage, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Cabbage is a leafy vegetable belonging to the cruciferous family," +
+                        " known for its dense nutrient content and culinary versatility." +
+                        " It is rich in vitamins C and K, dietary fiber, and antioxidants, which promote digestion, " +
+                        "boost immunity, and support heart health. Cabbage can be eaten raw in salads, fermented as sauerkraut," +
+                        " or cooked in soups and stir-fries, making it a staple in many global cuisines.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -155,7 +187,11 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.sukuma_wiki, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Sukuma wiki, also known as collard greens," +
+                        " is a popular leafy vegetable in East Africa, particularly in Kenya." +
+                        " It is rich in vitamins A, C, and K, calcium, and dietary fiber, making it a nutritious addition to meals. " +
+                        "Typically sautéed with onions, tomatoes, and spices, sukuma wiki is an affordable and versatile dish often" +
+                        " served alongside staples like ugali or rice, promoting health and sustenance.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -166,7 +202,10 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.arrow_roots, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Arrowroots are starchy tubers that are highly valued for their easy digestibility and nutritional benefits." +
+                        " They are a rich source of carbohydrates and provide essential minerals like calcium and potassium. Often boiled or steamed, " +
+                        "arrowroots are consumed as a healthy alternative to potatoes or other root crops." +
+                        " Their mild flavor makes them a versatile ingredient in soups, baked goods, and traditional dishes.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -177,7 +216,11 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.wheat, // Replace with your actual drawable resource ID
-                cropDescription = "Beans are a good source of protein and essential nutrients.",
+                cropDescription = "Wheat is a staple cereal crop that forms the foundation of many diets around the world." +
+                        " It is the primary ingredient in bread, pasta," +
+                        " pastries, and numerous other baked goods." +
+                        " Rich in carbohydrates, wheat also provides dietary fiber, B vitamins, and essential minerals like iron and zinc." +
+                        " Whole wheat products are particularly valued for their role in promoting heart health and aiding digestion.",
                 farmerId = "",
                 farmerName = "",
                 location = ""
@@ -191,6 +234,7 @@ class ProductDetailsViewModel : ViewModel() {
 
         // Return details like name, image resource, etc. from a local source or hardcoded list.
     }
+
 
     fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
@@ -311,7 +355,10 @@ data class Farmer(
     val cropId: String = "",
     val quantity: Int = 0,
     val location: String=""
-)
+) {
+
+}
+
 
 class FirestoreRepo {
     private val db = FirebaseFirestore.getInstance()
@@ -332,6 +379,7 @@ class FirestoreRepo {
             .addOnFailureListener { exception ->
                 Log.w("FirestoreRepo", "Error getting documents: ", exception)
             }
+
         return farmers // This may need to be adjusted for asynchronous behavior
     }
 }
@@ -400,23 +448,15 @@ fun ProductDetailsScreen(
         Image(
             painter = painterResource(id = cropDetails.cropImage),
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth().height(200.dp).clip(CircleShape)
+            modifier = Modifier.fillMaxWidth().height(200.dp)
         )
-        Column(
-            modifier = Modifier.fillMaxWidth(), // Ensures the Column takes the full width
-            horizontalAlignment = Alignment.CenterHorizontally // Centers content horizontally
-        ) {
-        Text(
-            text = cropDetails.name,
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Text(text = cropDetails.name, style = MaterialTheme.typography.headlineSmall)
         Text(
             text = cropDetails.cropDescription,
             modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
-    }
 
         // Farmers Section
         Text(text = "Farmers Selling This Crop:", style = MaterialTheme.typography.headlineSmall)
@@ -450,11 +490,12 @@ fun OrderScreen(
     }
 
     // Fetch Farmer Details
-    LaunchedEffect(farmerId) {
-        db.collection("crops").document(farmerId).get()
+    // Fetch Farmer Details
+    LaunchedEffect(cropId) {
+        db.collection("crops").document(cropId).get()
             .addOnSuccessListener { document ->
                 farmer = Farmer(
-                    id = document.id,
+                    id = document.getString("farmerId") ?: "Unknown", // Correctly fetch farmerId
                     FarmerName = document.getString("farmerName") ?: "Unknown",
                     name = document.getString("name") ?: "",
                     quantity = document.getLong("quantity")?.toInt() ?: 0,
@@ -465,6 +506,7 @@ fun OrderScreen(
                 Log.e("OrderScreen", "Error fetching farmer details: ${exception.message}")
             }
     }
+
 
     // Fetch Customer Details
     LaunchedEffect(Unit) {
@@ -487,7 +529,6 @@ fun OrderScreen(
     }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -503,6 +544,7 @@ fun OrderScreen(
 
             Text(text = "Location: ${farmer?.location}", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
+
 
             // Editable Quantity Field
             TextField(

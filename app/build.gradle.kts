@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.coil.compose)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.crashlytics.buildtools)
     //implementation(libs.firebase.vertexai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -6,35 +6,33 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-//import androidx.compose.material3.MaterialTheme
-//import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-//import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-//import androidx.compose.ui.platform.LocalContext
-//import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-//import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-//import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-//import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.androidproject2.data.ImageSource
 import com.example.androidproject2.model.Catalog
 import com.example.androidproject2.R
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.androidproject2.model.FinancialTrendsViewModel
 
 /*
 @Composable
@@ -202,16 +200,10 @@ fun AppNavigation(navController: NavHostController) {
             arguments = listOf(navArgument("cropId") { type = NavType.StringType })
         ) { backStackEntry ->
             val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
-            // Get the ProductDetailsViewModel using the viewModel() function
-            val viewModel: ProductDetailsViewModel = viewModel()
+            val viewModel = ProductDetailsViewModel()
             ProductDetailsScreen(navController, cropId, viewModel)
         }
-        composable("crop_input") { CropInputScreen(navController) }
-        composable("financial_trends") {
-            val viewModel: FinancialTrendsViewModel = viewModel() // Automatically creates or retrieves the ViewModel
-            FinancialTrendsScreen(viewModel)
-        }
-
+        composable("crop_input"){ CropInputScreen(navController)}
         composable(
             route = "order_screen/{farmerId}/{cropId}",
             arguments = listOf(
@@ -221,8 +213,9 @@ fun AppNavigation(navController: NavHostController) {
         ) { backStackEntry ->
             val farmerId = backStackEntry.arguments?.getString("farmerId") ?: ""
             val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
-            val viewModel: ProductDetailsViewModel = viewModel()  // Correct way to get ViewModel
+            val viewModel = ProductDetailsViewModel()
             OrderScreen(navController, farmerId, cropId, viewModel)
         }
     }
 }
+
