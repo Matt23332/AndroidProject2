@@ -34,6 +34,9 @@ import com.example.androidproject2.data.ImageSource
 import com.example.androidproject2.model.Catalog
 import com.example.androidproject2.R
 import com.example.androidproject2.ui.CustomerScreens.CustomerScreen
+import com.google.firestore.v1.StructuredQuery.Order
+
+//import com.example.androidproject2.ui.CustomerScreens.CustomerScreen
 
 /*
 @Composable
@@ -259,5 +262,36 @@ fun DefaultNavigation(navController: NavHostController) {
     }
 }
 
+@Composable
+fun AppNavigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") { HomeScreen(navController) }
+        composable(
+            "product_details/{cropId}",
+            arguments = listOf(navArgument("cropId") { type = NavType.StringType })
+            ) {backStackEntry ->
+            val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+            val viewModel: ProductDetailsViewModel = viewModel()
+            ProductDetailsScreen(navController, cropId, viewModel)
+        }
+        composable("crop_input") { CropInputScreen(navController) }
+        composable("financial_trends") {
+            //val viewModel: FinancialTrendsViewModel = viewModel()
+            //FinancialTrendsScreen(viewModel)
+        }
+        composable(
+            route = "order_screen/{farmerId}/{cropId}",
+            arguments = listOf(
+                navArgument("farmerId") { type = NavType.StringType },
+                navArgument("cropId") { type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val farmerId = backStackEntry.arguments?.getString("farmerId") ?: ""
+            val cropId = backStackEntry.arguments?.getString("cropId") ?: ""
+            val viewModel: ProductDetailsViewModel = viewModel()
+            OrderScreen(navController, farmerId, cropId, viewModel)
+        }
+    }
+}
 
 
