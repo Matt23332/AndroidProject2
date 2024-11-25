@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.androidx.media3.effect)
     implementation(libs.androidx.constraintlayout)
+    //implementation(androidx.constraintlayout:constraintlayout-compose:1.0.1)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime.android)
@@ -77,6 +78,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation(libs.androidx.espresso.core)
     //implementation(libs.firebase.vertexai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -85,4 +89,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    lintChecks("androidx.constraintlayout:constraintlayout-compose:<latest_version>")
 }
