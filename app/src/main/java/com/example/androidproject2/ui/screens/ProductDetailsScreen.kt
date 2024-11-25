@@ -30,27 +30,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 
 import com.example.androidproject2.R
 import com.example.androidproject2.data.Crop
-import com.example.androidproject2.data.OrderData
-import com.example.androidproject2.data.OrderState
-import com.example.androidproject2.data.ProductDescriptionData
-import com.example.androidproject2.data.ProductFlavourData
-import com.example.androidproject2.data.ProductFlavourState
-import com.example.androidproject2.data.ProductNutritionData
-import com.example.androidproject2.data.ProductNutritionState
-import com.example.androidproject2.data.ProductPreviewState
-import com.example.androidproject2.ui.screens.components.FlavourSection
-import com.example.androidproject2.ui.screens.components.OrderActionBar
-import com.example.androidproject2.ui.screens.components.ProductDescriptionSection
-import com.example.androidproject2.ui.screens.components.ProductNutritionSection
-import com.example.androidproject2.ui.screens.components.ProductPreviewSection
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -142,7 +125,7 @@ class ProductDetailsViewModel : ViewModel() {
                 type = "",
                 quantity = 0,
                 cropImage = R.drawable.maize, // Replace with your actual drawable resource ID
-                cropDescription = "Maiz e, also known as corn, is a versatile and globally important cereal crop. " +
+                cropDescription = "Maize, also known as corn, is a versatile and globally important cereal crop. " +
                         "It serves as a dietary staple in many regions and is consumed in various forms, including fresh, " +
                         "dried, or processed into flour, snacks, or syrups. Maize is rich in carbohydrates, providing a " +
                         "significant source of energy, and also contains essential vitamins like B-complex and minerals like magnesium. " +
@@ -236,7 +219,7 @@ class ProductDetailsViewModel : ViewModel() {
     }
 
 
-    fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
+  /*  fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val farmers = mutableListOf<Farmer>()
 
@@ -259,51 +242,42 @@ class ProductDetailsViewModel : ViewModel() {
                 Log.e("Firestore", "Error fetching farmers: ${exception.message}")
                 onComplete(emptyList()) // If the fetch fails, return an empty list
             }
+    }*/
+
+
+    fun getFarmersForCrop(cropId: String, onComplete: (List<Farmer>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val farmers = mutableListOf<Farmer>()
+
+        db.collection("crops") // Assuming the collection is "crops"
+            .whereEqualTo("name", cropId) // Use "cropId" instead of "name"
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val farmer = Farmer(
+                        id = document.id,
+                        name = document.getString("name") ?: "Unknown",
+                        FarmerName = document.getString("farmerName") ?: "Unknown",
+                        //cropId = document.getString("cropId") ?: "",
+                        quantity = document.getLong("quantity")?.toInt() ?: 0,
+                        location = document.getString("location") ?: "Unknown"
+                    )
+                    farmers.add(farmer)
+                }
+                onComplete(farmers) // Return the fetched list of farmers
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error fetching farmers: ${exception.message}")
+                onComplete(emptyList()) // If the fetch fails, return an empty list
+            }
     }
 
 
-    /*  fun placeOrder(
-        cropId: String,
-        farmerId: String,
-        orderQuantity: Int,
-        farmerName: String,
-        customerId: String,
-        customerName: String,
-        location: String,
-        deliveryAddress: String
-        ) {
-        val db = FirebaseFirestore.getInstance()
-        val farmerRef = db.collection("crops").document(farmerId)
 
-        db.runTransaction { transaction ->
-            val snapshot = transaction.get(farmerRef)
-            val currentQuantity = snapshot.getLong("quantity")?.toInt() ?: 0
 
-            if (currentQuantity >= orderQuantity) {
-                transaction.update(farmerRef, "quantity", currentQuantity - orderQuantity)
-                // Add sale record
-                val sale = hashMapOf(
-                    "farmerId" to farmerId,
-                    "farmerName" to farmerName,
-                    "customerId" to customerId,
-                    "customerName" to customerName,
-                    "cropId" to cropId,
-                    "quantity" to orderQuantity,
-                    "location" to location,
-                    "deliveryAddress" to deliveryAddress,
-                    "timestamp" to System.currentTimeMillis() // Add a timestamp for sorting
-                )
-                db.collection("sales").add(sale)
-            } else {
-                throw Exception("Order quantity exceeds available stock.")
-            }
-        }.addOnSuccessListener {
-            Log.d("Order", "Order placed successfully for $orderQuantity kg")
-        }.addOnFailureListener { e ->
-            Log.e("Order", "Order failed: ${e.message}")
-        }
 
-}*/
+
+
 
     fun placeOrder(
         cropId: String,
@@ -474,7 +448,7 @@ fun ProductDetailsScreen(
 fun OrderScreen(
     navController: NavController,
     farmerId: String,
-    cropId: String,
+    cropName: String,
     viewModel: ProductDetailsViewModel
 ) {
     val db = FirebaseFirestore.getInstance()
@@ -490,23 +464,28 @@ fun OrderScreen(
     }
 
     // Fetch Farmer Details
-    // Fetch Farmer Details
-    LaunchedEffect(cropId) {
-        db.collection("crops").document(cropId).get()
-            .addOnSuccessListener { document ->
-                farmer = Farmer(
-                    id = document.getString("farmerId") ?: "Unknown", // Correctly fetch farmerId
-                    FarmerName = document.getString("farmerName") ?: "Unknown",
-                    name = document.getString("name") ?: "",
-                    quantity = document.getLong("quantity")?.toInt() ?: 0,
-                    location = document.getString("location") ?: ""
-                )
+    LaunchedEffect(farmerId, cropName) {
+        db.collection("crops")
+            .whereEqualTo("name", cropName)
+            .whereEqualTo("farmerId", farmerId) // Filter by farmerId
+            .get()
+            .addOnSuccessListener { result ->
+                if (result.documents.isNotEmpty()) {
+                    val document = result.documents.first()
+                    farmer = Farmer(
+                        id = document.getString("farmerId") ?: "Unknown",
+                        FarmerName = document.getString("farmerName") ?: "Unknown",
+                        name = document.getString("name") ?: "",
+                        quantity = document.getLong("quantity")?.toInt() ?: 0,
+                        location = document.getString("location") ?: ""
+                    )
+                    cropLocation = farmer?.location ?: "Unknown Location"
+                }
             }
             .addOnFailureListener { exception ->
                 Log.e("OrderScreen", "Error fetching farmer details: ${exception.message}")
             }
     }
-
 
     // Fetch Customer Details
     LaunchedEffect(Unit) {
@@ -515,17 +494,6 @@ fun OrderScreen(
             customerId = currentUser.uid
             customerName = currentUser.displayName ?: "Unknown"
         }
-    }
-
-    // Fetch Crop Location
-    LaunchedEffect(cropId) {
-        db.collection("crops").document(cropId).get()
-            .addOnSuccessListener { document ->
-                cropLocation = document.getString("location") ?: "Unknown Location"
-            }
-            .addOnFailureListener { exception ->
-                Log.e("OrderScreen", "Error fetching crop location: ${exception.message}")
-            }
     }
 
     Column(
@@ -575,11 +543,10 @@ fun OrderScreen(
             // Submit Order Button
             TextButton(
                 onClick = {
-
                     if (isQuantityValid && deliveryAddress.isNotBlank()) {
                         val orderQuantity = quantity.toInt()
                         viewModel.placeOrder(
-                            cropId = cropId,
+                            cropId = cropName,
                             farmerId = farmerId,
                             orderQuantity = orderQuantity,
                             farmerName = farmer?.FarmerName ?: "Unknown",
@@ -591,7 +558,7 @@ fun OrderScreen(
                         navController.popBackStack() // Navigate back after placing the order
                     }
                 },
-                enabled = isQuantityValid && deliveryAddress.isNotBlank() && cropLocation.isNotEmpty(),
+                enabled = isQuantityValid && deliveryAddress.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Place Order")
@@ -599,6 +566,7 @@ fun OrderScreen(
         }
     }
 }
+
 
 
 

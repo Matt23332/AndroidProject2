@@ -29,6 +29,9 @@ firebaseStorageKtx = "21.0.1"
 firebaseCrashlyticsBuildtools = "3.0.2"
 
 [libraries]
+
+retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
+converter-gson = "com.squareup.retrofit2:converter-gson:2.9.0"
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }

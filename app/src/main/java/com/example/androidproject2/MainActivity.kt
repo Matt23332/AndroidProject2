@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject2.ui.screens.AppNavigation
 import com.example.androidproject2.ui.CustomerScreens.CustomerScreen
-import com.example.androidproject2.ui.screens.FarmerNavigation
+import com.example.androidproject2.ui.screens.AppNavigation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                 setContent {
                     val navController = rememberNavController()
                     when (role) {
-                        "farmer" -> FarmerNavigation(navController)
+                        "farmer" -> AppNavigation(navController)
                         "customer" -> CustomerScreen(navController)
                         else -> {
                             Toast.makeText(
