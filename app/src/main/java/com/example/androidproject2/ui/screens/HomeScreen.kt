@@ -17,15 +17,18 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject2.model.FinancialTrendsViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 sealed class Screen(val route: String, val icon: ImageVector, val label: String) {
     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
     object History : Screen("history", Icons.Default.History, "History")
-    object Trends : Screen("trends", Icons.AutoMirrored.Filled.TrendingUp, "Trends")
+    object Trends : Screen("weather forecast", Icons.AutoMirrored.Filled.TrendingUp, "Weather")
     object MyCrops : Screen("my crops", Icons.Default.Agriculture, "My Crops")
     object Profile : Screen("profile", Icons.Default.Person, "Profile")
 }
@@ -54,7 +57,7 @@ fun HomeScreen(navController: NavHostController) {
         ) {
             composable(Screen.Catalog.route) { CatalogScreen(navController) }
             composable(Screen.History.route) { HistoryScreen(navController) }
-            composable(Screen.Trends.route) { TrendsScreen() }
+            composable(Screen.Trends.route) { WeatherForecastScreen() }
             composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
             composable(Screen.Profile.route) {
                 val userId = currentUser?.uid
@@ -120,15 +123,59 @@ fun BottomNavBar(navController: NavHostController) {
 
 
 @Composable
-fun TrendsScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun WeatherForecastScreen() {
+    var temperature by remember { mutableStateOf(20) }
+    var weatherCondition by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text(
-            text = "Trends Screen",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
+            text = "Weather Forecast",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Current Temperature",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "$temperature°C",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = weatherCondition,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
+
+        // Placeholder for future weather details
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Future forecast sections will be added here",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
+
 
 @Composable
 fun MyCropsScreen(navController: NavController) {
