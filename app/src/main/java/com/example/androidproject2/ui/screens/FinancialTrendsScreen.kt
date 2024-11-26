@@ -15,7 +15,7 @@ import com.example.androidproject2.model.RevenueDataPoint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.text.*
-
+/*
 @Composable
 fun FinancialTrendsScreen(viewModel: FinancialTrendsViewModel) {
     val revenueData = viewModel.revenueData.collectAsState().value
@@ -37,7 +37,7 @@ fun FinancialTrendsScreen(viewModel: FinancialTrendsViewModel) {
         }
     }
 }
-
+ */
 @Composable
 fun RevenueItem(revenueDataPoint: RevenueDataPoint, monthOffset: Int) {
     // Create a copy of the revenue date to avoid modifying the original

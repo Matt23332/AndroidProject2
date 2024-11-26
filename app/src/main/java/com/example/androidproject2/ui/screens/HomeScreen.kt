@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidproject2.model.FinancialTrendsViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,6 +31,7 @@ sealed class Screen(val route: String, val icon: ImageVector, val label: String)
     object Catalog : Screen("catalog", Icons.Default.Home, "Catalog")
     object History : Screen("history", Icons.Default.History, "History")
     object Trends : Screen("weather forecast", Icons.AutoMirrored.Filled.TrendingUp, "Weather")
+    object FinancialTrends : Screen("financial trends", Icons.AutoMirrored.Filled.TrendingFlat, "Prices")
     object MyCrops : Screen("my crops", Icons.Default.Agriculture, "My Crops")
     object Profile : Screen("profile", Icons.Default.Person, "Profile")
 }
@@ -58,6 +61,10 @@ fun HomeScreen(navController: NavHostController) {
             composable(Screen.Catalog.route) { CatalogScreen(navController) }
             composable(Screen.History.route) { HistoryScreen(navController) }
             composable(Screen.Trends.route) { WeatherForecastScreen() }
+            composable("financial trends") {
+                val viewModel: FinancialTrendsViewModel = viewModel()
+                FinancialTrendsScreen(viewModel)
+            }
             composable(Screen.MyCrops.route) { MyCropsScreen(navController) }
             composable(Screen.Profile.route) {
                 val userId = currentUser?.uid
@@ -96,6 +103,7 @@ fun BottomNavBar(navController: NavHostController) {
         Screen.Catalog,
         Screen.History,
         Screen.Trends,
+        Screen.FinancialTrends,
         Screen.MyCrops,
         Screen.Profile
     )
@@ -120,7 +128,29 @@ fun BottomNavBar(navController: NavHostController) {
     }
 }
 
+@Composable
+fun FinancialTrendsScreen(viewModel: FinancialTrendsViewModel) {
+    val revenueData = viewModel.revenueData.collectAsState().value
+    val forecastData = viewModel.forecastData.collectAsState().value
 
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .fillMaxSize()
+    ) {
+        Text("Total Revenue: Ksh ${viewModel.totalRevenue.formatToKsh()}")
+
+        Text("Revenue Data:")
+        revenueData.forEachIndexed { index, dataPoint ->
+            // Pass a month offset based on the index (e.g., recent months are offset negatively)
+            RevenueItem(dataPoint, monthOffset = -index)
+        }
+        Text("Forecast Data:")
+        forecastData.forEachIndexed { index, dataPoint ->
+            // Incrementally update forecast months positively
+            ForecastItem(dataPoint, monthOffset = index + 1)
+        }
+    }
+}
 
 @Composable
 fun WeatherForecastScreen() {
